@@ -422,7 +422,7 @@ func (u User) AdCheckinToDb(fio, dt, tm string) { // Записываем тре
 
 //! ============= МЕТОДЫ ПО РАБОТЕ С СИСТЕМОЙ КОНТРОЛЯ КТО В ЦЕХУ =====================
 func (j Journal) WhoInPlace() {
-	today := "Sun May  1 03:21:54 2022"
+	today, _ := TmFormat()
 	var id string
 	fmt.Println(today)
 	db, err := sql.Open("sqlite3", "./scud.db")

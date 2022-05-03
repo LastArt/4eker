@@ -12,7 +12,7 @@ func GetStart() {
 	var dataTime, adminPass string
 	//var res int
 	var check bool
-	t := time.Now()
+	//t := time.Now()
 	pattern := "[[:digit:]]"
 	reg := regexp.MustCompile(pattern)
 
@@ -27,7 +27,6 @@ L1:
 		fmt.Println(string(set.Yellow), "Введите пароль администратора", string(set.ResetColor))
 		adminPass = NewScan()
 		check = CheckAdminUser(adminPass)
-		fmt.Println("Приняли инфо из функции проверки юзера = ", check)
 		if check != true {
 			fmt.Println("Доступ запрещен!")
 		} else {
@@ -41,9 +40,10 @@ L1:
 		if isNumbers {
 			var usr = new(User)
 			//res, _ = strconv.Atoi(dataTime)
+			dt, tm := TmFormat()
 			whoEntered := usr.CheckInTimeValidation(dataTime)
-			usr.AdCheckinToDb(whoEntered[1], t.Format(time.ANSIC), t.Format(time.Kitchen))
-			Check(whoEntered[1], whoEntered[0], whoEntered[2])
+			usr.AdCheckinToDb(whoEntered[1], dt, tm)
+			Check(whoEntered[1], whoEntered[0], whoEntered[2], dt, tm)
 			goto L1
 		} else {
 			fmt.Println(string(set.Red), "Вы ввели некорректные данные попробуйте еще раз!", string(set.ResetColor))

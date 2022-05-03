@@ -4,7 +4,9 @@ import (
 	"bufio"
 	"bytes"
 	"database/sql"
+	"encoding/json"
 	"fmt"
+	"kontroller/set"
 	"log"
 	"os"
 	"os/exec"
@@ -105,12 +107,46 @@ func ClearConsole() {
 	out.String()
 }
 
-func Check(fio, cardnum, spec string) {
-	c := New("5051681006:AAEU_3nVrrO5HMR8Ri3w4159NcshdclxgTI")
+func Check(fio, cardnum, spec, dt, tm string) {
+	tg_key := GetKey(set.TokenFile)
+	c := New(tg_key)
 	chatId := -644032460
-	cText := ("🟢Отметился:  " + fio + "\nНомер: " + cardnum + "\nДолжность: " + spec + "\nДата: " + time.Now().String())
+	cText := ("🟢Отметился:  \n" + fio + "\nНомер: " + cardnum + "\nДолжность: " + spec + "\nДата: " + dt + "\nВремя: " + tm)
 	err := c.SendMessage(cText, int64(chatId))
 	if err != nil {
 		fmt.Println("ОШИБКА ОТПРАВКИ СООБЩЕНИЯ БОТУ: ", err)
 	}
+}
+
+func TmFormat() (string, string) {
+	tTime := time.Date(2022, time.Now().Month(), time.Now().Day(), time.Now().Hour(), time.Now().Minute(), 0, 0, time.Local)
+	//func Date(year int, month Month, day, hour, min, sec, nsec int, loc *Location) Time
+	tDate := tTime.Format("02.01.2006")
+	tT := tTime.Format("15:04")
+	return tDate, tT
+}
+
+//
+type Config struct {
+	TelegramBotToken string
+}
+
+func GetKey(path string) string {
+	var TG_token string
+	file, err := os.Open(path)
+	if err != nil {
+		fmt.Printf("ОШИБКА получения токена: ")
+		panic(err.Error())
+	}
+
+	decoder := json.NewDecoder(file)
+	conf := Config{}
+	err = decoder.Decode(&conf)
+	if err != nil {
+		panic(err.Error())
+	}
+
+	TG_token = conf.TelegramBotToken
+
+	return TG_token
 }

@@ -2,6 +2,7 @@ package main
 
 import (
 	"kontroller/pkg"
+	"kontroller/set"
 	"log"
 
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
@@ -116,7 +117,7 @@ var exitKey = tgbotapi.NewInlineKeyboardMarkup(
 //=============== КОНЕЦ БЛОКА С ИНЛАЙН КНОПКАМИ =============
 
 func main() {
-	bot, _ := tgbotapi.NewBotAPI("5051681006:AAEU_3nVrrO5HMR8Ri3w4159NcshdclxgTI")
+	bot, _ := tgbotapi.NewBotAPI(pkg.GetKey(set.TokenFile))
 
 	u := tgbotapi.NewUpdate(0)
 	u.Timeout = 60

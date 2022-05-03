@@ -73,3 +73,5 @@ var (
 	Cyan       string = "\033[36m"
 	White      string = "\033[37m"
 )
+
+var TokenFile = "D:/GIT REP/TOKENS/key_checker.json"
