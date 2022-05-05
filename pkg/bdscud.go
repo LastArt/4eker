@@ -20,8 +20,8 @@ type User struct {
 
 type Journal struct {
 	Date string
-	Fio  string
 	Time string
+	User User
 }
 
 type SuperUser struct {
@@ -42,7 +42,7 @@ type EmplChanger interface {
 	EditFromBot()
 }
 
-//! ============= МЕТОДЫ ПО АДМИНИСТРАТОРАМ ====================
+//*============= МЕТОДЫ ПО АДМИНИСТРАТОРАМ ====================
 //Метод добавляющий администраторa через консоль
 func (su SuperUser) Add() {
 	db, err := sql.Open("sqlite3", "./scud.db")
@@ -87,8 +87,6 @@ func (su SuperUser) DeleteRow(login string) {
 		panic(err)
 	}
 	defer db.Close()
-
-	// удаляем строку с id=1
 	_, err = db.Exec("DELETE FROM superuser WHERE Login = ?", login)
 	if err != nil {
 		fmt.Println(set.Red, "ОШИБКА:", set.ResetColor, err)
@@ -151,6 +149,7 @@ func (su SuperUser) ShowAll() {
 
 //TODO Метод редактирующий администраторов  из консоли
 func (su SuperUser) Edit() {
+
 }
 
 //TODO Метод редактирующий администраторов  из чат бота
@@ -166,7 +165,7 @@ func (su SuperUser) ShowAllInBot() string {
 		panic(err)
 	}
 	defer db.Close()
-	rows, err := db.Query("select * from superuser")
+	rows, err := db.Query("SELECT * FROM superuser")
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -193,7 +192,7 @@ func (su SuperUser) AddInBot(log, pass, mail string) string {
 		panic(err)
 	}
 	defer db.Close()
-	_, err = db.Exec("insert into superuser (Login, Password, Email) values (?, ?, ?)", log, pass, mail)
+	_, err = db.Exec("INSERT INTO superuser (Login, Password, Email) VALUES (?, ?, ?)", log, pass, mail)
 	if err != nil {
 		res = "⛔️Ошибка выполнения записи в БД\nПопробуйте еще раз!"
 	} else {
@@ -203,7 +202,7 @@ func (su SuperUser) AddInBot(log, pass, mail string) string {
 	return res
 }
 
-//! ============= МЕТОДЫ ПО СОТРУДНИКАМ ====================
+//============= МЕТОДЫ ПО СОТРУДНИКАМ ====================
 // Метод добавляющий сотрудника через консоль!
 func (u User) Add() {
 	db, err := sql.Open("sqlite3", "./scud.db")
@@ -225,7 +224,7 @@ func (u User) Add() {
 	fmt.Printf(set.Yellow+"Введенная Вами информация корректна?\n"+set.ResetColor+"\n№ Карты: %v \nФио сотрудника: %v \nСпециальность: %v \nЗарплата сотрудника: %v \n"+set.Yellow+"\nВведите букву Д-[Да], если согласны или Н-[Нет], если не согласны"+set.ResetColor+"\n", usr.Cardid, usr.Fio, usr.Speciality, usr.Salary)
 	fmt.Scan(&yesNo)
 	if yesNo == "Д" {
-		_, err = db.Exec("insert into user (CardId, Fio, Speciality, Salary) values (?, ?, ?, ?)", usr.Cardid, usr.Fio, usr.Speciality, usr.Salary)
+		_, err = db.Exec("INSERT INTO user (CardId, Fio, Speciality, Salary) VALUES (?, ?, ?, ?)", usr.Cardid, usr.Fio, usr.Speciality, usr.Salary)
 		if err != nil {
 			fmt.Println(set.Red, "ОШИБКА:", set.ResetColor, err)
 			panic(err)
@@ -249,7 +248,7 @@ func (u User) AddInBot(card, fio, spec, sal string) string {
 		panic(err)
 	}
 	defer db.Close()
-	_, err = db.Exec("insert into user (CardId, Fio, Speciality, Salary) values (?, ?, ?, ?)", card, fio, spec, sal)
+	_, err = db.Exec("INSERT INTO user (CardId, Fio, Speciality, Salary) VALUES (?, ?, ?, ?)", card, fio, spec, sal)
 	if err != nil {
 		res = "⛔️Ошибка выполнения записи в БД\nПопробуйте еще раз!"
 	} else {
@@ -283,7 +282,7 @@ func (u User) DeleteRowInBot(fio string) string {
 		panic(err)
 	}
 	defer db.Close()
-	_, err = db.Exec("delete from user where Fio = ?", fio)
+	_, err = db.Exec("DELETE FROM user WHERE Fio = ?", fio)
 
 	if err != nil {
 		res = "⛔️Ошибка выполнения удаления из БД\nПопробуйте еще раз!"
@@ -308,20 +307,17 @@ func (u User) ShowAll() {
 	table := tablewriter.NewWriter(os.Stdout)
 	table.SetHeader([]string{"Номер карты", "ФИО Сотрудника", "Должность", "Зарплата"})
 	for rows.Next() {
-		var sCardNum, sFio, sSpec, sSalary string
-
-		err = rows.Scan(&sCardNum, &sFio, &sSpec, &sSalary)
+		//var sCardNum, sFio, sSpec, sSalary string
+		err = rows.Scan(&u.Cardid, &u.Fio, &u.Speciality, &u.Salary)
 		if err != nil {
 			log.Fatal(err)
 		}
 		data := [][]string{
-			[]string{sCardNum, sFio, sSpec, sSalary},
+			[]string{u.Cardid, u.Fio, u.Speciality, u.Salary},
 		}
-
 		for _, v := range data {
 			table.Append(v)
 		}
-
 	}
 
 	table.Render()
@@ -329,26 +325,23 @@ func (u User) ShowAll() {
 
 // Метод выводящий весь список сотрудников в чат бота!
 func (u User) ShowAllInBot() string {
-
 	db, err := sql.Open("sqlite3", "./scud.db")
 	if err != nil {
 		panic(err)
 	}
 	defer db.Close()
-	rows, err := db.Query("select * from user")
+	rows, err := db.Query("SELECT * FROM user")
 	if err != nil {
 		log.Fatal(err)
 	}
 	defer rows.Close()
 	var str string
-
 	for rows.Next() {
 		err := rows.Scan(&u.Cardid, &u.Fio, &u.Speciality, &u.Salary)
 		if err != nil {
 			fmt.Println(err)
 			continue
 		}
-
 		str += "\n Номер карты: " + u.Cardid + "\n ФИО: " + u.Fio + "\n Должность: " + u.Speciality + "\n Зарплата: " + u.Salary + "\n=====================\n"
 	}
 	return str
@@ -364,8 +357,7 @@ func (u User) EditFromBot() {
 
 }
 
-//! ============= МЕТОДЫ ПО РАБОТЕ С ТРЕКИНГОМ ====================
-
+//Проверка валидности карты пропуска
 func (u User) CheckInTimeValidation(cardnum string) []string { // Определяем валидность номера карты
 	var crd string
 	var str = []string{"0", "0", "0"}
@@ -414,36 +406,102 @@ func (u User) AdCheckinToDb(fio, dt, tm string) { // Записываем тре
 	defer db.Close()
 	_, err = db.Exec("INSERT INTO journal (FioVisiter, Date, Time) values (?, ?, ?)", fio, dt, tm)
 	if err != nil {
-		fmt.Println(set.Red, "ОШИБКА:", set.ResetColor, err)
+		fmt.Println(set.ERROR_INSERT_TODB, err)
 	}
 }
 
 //! ============= МЕТОДЫ ПО РАБОТЕ С ОТЧЕТАМИ =====================
 
-//! ============= МЕТОДЫ ПО РАБОТЕ С СИСТЕМОЙ КОНТРОЛЯ КТО В ЦЕХУ =====================
+// Метод выводящий в консоль всех присутсвующих на текущую дату.
 func (j Journal) WhoInPlace() {
-	today, _ := TmFormat()
+	today, totime := TmFormat()
 	var id string
-	fmt.Println(today)
+	fmt.Println("Сегодня: ", today)
 	db, err := sql.Open("sqlite3", "./scud.db")
 	if err != nil {
 		panic(err)
 	}
 	defer db.Close()
-	rows, err := db.Query("SELECT * FROM journal WHERE Date = ?", today)
+	rows, err := db.Query("SELECT * FROM journal WHERE Date = ? AND Time < ?", today, totime) // Требуется доработка SQL запроса Вывести список сотрудников За сегодня и За время с 8 утра до текущего часа
 	if err != nil {
 		panic(err)
 	}
 	defer rows.Close()
 	journals := []Journal{}
+	table := tablewriter.NewWriter(os.Stdout)
+	table.SetHeader([]string{"ID записи", "ФИО", "Дата отметки", "Время отметки"})
 	for rows.Next() {
 		p := Journal{}
-		err := rows.Scan(&id, &p.Date, &p.Fio, &p.Time)
+		err := rows.Scan(&id, &j.User.Fio, &j.Date, &j.Time)
+		j.Date, _ = TmFormat()
 		if err != nil {
 			fmt.Println(err)
 			continue
 		}
 		journals = append(journals, p)
+		data := [][]string{
+			[]string{id, j.User.Fio, j.Date, j.Time},
+		}
+		for _, v := range data {
+			table.Append(v)
+		}
 	}
-	fmt.Println(journals)
+	table.Render()
+
 }
+
+func (j Journal) WhoInPlaceForBot() string {
+
+	today, totime := TmFormat()
+	var id string
+	fmt.Println("Сегодня: ", today)
+	db, err := sql.Open("sqlite3", "./scud.db")
+	if err != nil {
+		panic(err)
+	}
+	defer db.Close()
+	rows, err := db.Query("SELECT * FROM journal WHERE Date = ? AND Time < ?", today, totime)
+	if err != nil {
+		panic(err)
+	}
+	defer rows.Close()
+	var str string
+
+	for rows.Next() {
+		err := rows.Scan(&id, &j.User.Fio, &j.Date, &j.Time)
+		if err != nil {
+			fmt.Println(err)
+			continue
+		}
+		//j.Date, _ = TmFormat()
+		str += "\nID: " + id + "\nФИО: " + j.User.Fio + "\nДата отметки: " + j.Date + "\nВремя отметки: " + j.Time + "\n=====================\n"
+	}
+	return str
+}
+
+// TODO Работа с файлом excel
+func (j Journal) ExportToExcel() {
+	db, err := sql.Open("sqlite3", "./scud.db")
+	if err != nil {
+		panic(err)
+	}
+	defer db.Close()
+
+	rows, err := db.Query("SELECT * FROM journal WHERE Data = ?")
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer rows.Close()
+	//var str string
+	// for rows.Next() {
+	// 	err := rows.Scan(&u.Cardid, &u.Fio, &u.Speciality, &u.Salary)
+	// 	if err != nil {
+	// 		fmt.Println(err)
+	// 		continue
+	// 	}
+	// 	str += "\n Номер карты: " + u.Cardid + "\n ФИО: " + u.Fio + "\n Должность: " + u.Speciality + "\n Зарплата: " + u.Salary + "\n=====================\n"
+	// }
+}
+
+//TODO  Модуль добавления TOKENA в меню программы
+//TODO  Распределить все настройки по группам

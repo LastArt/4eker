@@ -13,25 +13,28 @@ import (
 // =================================================================================
 var nmShowVisiters = tgbotapi.NewReplyKeyboard( // Показывает журнал присутсвубщих
 	tgbotapi.NewKeyboardButtonRow(
-		tgbotapi.NewKeyboardButton("👁Кто в цеху"),
+		tgbotapi.NewKeyboardButton("👁 Кто в цеху"),
 	),
 	tgbotapi.NewKeyboardButtonRow(
-		tgbotapi.NewKeyboardButton("📊Отчеты"),
+		tgbotapi.NewKeyboardButton("📊 Отчеты"),
 	),
 	tgbotapi.NewKeyboardButtonRow(
-		tgbotapi.NewKeyboardButton("🛠Настройки"),
+		tgbotapi.NewKeyboardButton("🛠 Настройки"),
 	),
 )
 
 var nmKeyJournal = tgbotapi.NewReplyKeyboard(
 	tgbotapi.NewKeyboardButtonRow(
-		tgbotapi.NewKeyboardButton("📖Журнал посещений"), // За период
+		tgbotapi.NewKeyboardButton("📖 Журнал посещений"), // За период
 	),
 	tgbotapi.NewKeyboardButtonRow(
-		tgbotapi.NewKeyboardButton("💵ЗП по сотруднику за период"), // За период
+		tgbotapi.NewKeyboardButton("💵 ЗП по сотруднику за период"), // За период
 	),
 	tgbotapi.NewKeyboardButtonRow(
-		tgbotapi.NewKeyboardButton("📆Журнал посещения по сотруднику"), // За период
+		tgbotapi.NewKeyboardButton("📆 Журнал посещения по сотруднику"), // За период
+	),
+	tgbotapi.NewKeyboardButtonRow(
+		tgbotapi.NewKeyboardButton("📤 Экспорт журнала в Excel"), // За период/ По сотруднику / По дате
 	),
 	tgbotapi.NewKeyboardButtonRow(
 		tgbotapi.NewKeyboardButton("🔙 Вернуться"),
@@ -39,13 +42,13 @@ var nmKeyJournal = tgbotapi.NewReplyKeyboard(
 )
 var nmKeySettings = tgbotapi.NewReplyKeyboard(
 	tgbotapi.NewKeyboardButtonRow(
-		tgbotapi.NewKeyboardButton("👷🏽Сотрудники"), //Открывает еще 3 кнопки nmKeyEmpl
+		tgbotapi.NewKeyboardButton("👷🏽 Сотрудники"), //Открывает еще 3 кнопки nmKeyEmpl
 	),
 	tgbotapi.NewKeyboardButtonRow(
-		tgbotapi.NewKeyboardButton("🦸🏻Администраторы"), //Открывает еще 3 кнопки nmKeyAdmin
+		tgbotapi.NewKeyboardButton("🦸🏻 Администраторы"), //Открывает еще 3 кнопки nmKeyAdmin
 	),
 	tgbotapi.NewKeyboardButtonRow(
-		tgbotapi.NewKeyboardButton("🗄База данных"), //Открывает еще 3 кнопки nmKeyDataBase
+		tgbotapi.NewKeyboardButton("🗄 База данных"), //Открывает еще 3 кнопки nmKeyDataBase
 	),
 	tgbotapi.NewKeyboardButtonRow(
 		tgbotapi.NewKeyboardButton("🔙 Вернуться"),
@@ -55,16 +58,16 @@ var nmKeySettings = tgbotapi.NewReplyKeyboard(
 // ============= ВТОРОЙ УРОВЕНЬ КНОПОК nmKeySettings=========================
 var nmKeyEmpl = tgbotapi.NewReplyKeyboard(
 	tgbotapi.NewKeyboardButtonRow(
-		tgbotapi.NewKeyboardButton("➕Добавить сотрудника"),
+		tgbotapi.NewKeyboardButton("➕ Добавить сотрудника"),
 	),
 	tgbotapi.NewKeyboardButtonRow(
-		tgbotapi.NewKeyboardButton("❌Удалить сотрудника"),
+		tgbotapi.NewKeyboardButton("❌ Удалить сотрудника"),
 	),
 	tgbotapi.NewKeyboardButtonRow(
-		tgbotapi.NewKeyboardButton("✏️Редактировать сотрудника"),
+		tgbotapi.NewKeyboardButton("✏️ Редактировать сотрудника"),
 	),
 	tgbotapi.NewKeyboardButtonRow(
-		tgbotapi.NewKeyboardButton("🗂Список сотрудников"),
+		tgbotapi.NewKeyboardButton("🗂 Список сотрудников"),
 	),
 	tgbotapi.NewKeyboardButtonRow(
 		tgbotapi.NewKeyboardButton("🔙 Вернуться"),
@@ -73,16 +76,16 @@ var nmKeyEmpl = tgbotapi.NewReplyKeyboard(
 
 var nmKeyAdmin = tgbotapi.NewReplyKeyboard(
 	tgbotapi.NewKeyboardButtonRow(
-		tgbotapi.NewKeyboardButton("➕Добавить администратора"),
+		tgbotapi.NewKeyboardButton("➕ Добавить администратора"),
 	),
 	tgbotapi.NewKeyboardButtonRow(
-		tgbotapi.NewKeyboardButton("❌Удалить администратора"),
+		tgbotapi.NewKeyboardButton("❌ Удалить администратора"),
 	),
 	tgbotapi.NewKeyboardButtonRow(
-		tgbotapi.NewKeyboardButton("✏️Редактировать администратора"),
+		tgbotapi.NewKeyboardButton("✏️ Редактировать администратора"),
 	),
 	tgbotapi.NewKeyboardButtonRow(
-		tgbotapi.NewKeyboardButton("🗂Список администраторов"),
+		tgbotapi.NewKeyboardButton("🗂 Список администраторов"),
 	),
 	tgbotapi.NewKeyboardButtonRow(
 		tgbotapi.NewKeyboardButton("🔙 Вернуться"),
@@ -91,16 +94,16 @@ var nmKeyAdmin = tgbotapi.NewReplyKeyboard(
 
 var nmKeyDataBase = tgbotapi.NewReplyKeyboard(
 	tgbotapi.NewKeyboardButtonRow(
-		tgbotapi.NewKeyboardButton("🔌Создать новое подключение"),
+		tgbotapi.NewKeyboardButton("🔌 Создать новое подключение"),
 	),
 	tgbotapi.NewKeyboardButtonRow(
-		tgbotapi.NewKeyboardButton("🧹Очистить базу данных"),
+		tgbotapi.NewKeyboardButton("🧹 Очистить базу данных"),
 	),
 	tgbotapi.NewKeyboardButtonRow(
-		tgbotapi.NewKeyboardButton("📦Сделать бекап БД"),
+		tgbotapi.NewKeyboardButton("📦 Сделать бекап БД"),
 	),
 	tgbotapi.NewKeyboardButtonRow(
-		tgbotapi.NewKeyboardButton("⚙️Посмотреть настройки подключения"),
+		tgbotapi.NewKeyboardButton("⚙️ Посмотреть настройки подключения"),
 	),
 	tgbotapi.NewKeyboardButtonRow(
 		tgbotapi.NewKeyboardButton("🔙 Вернуться"),
@@ -129,6 +132,7 @@ func main() {
 
 	usr := new(pkg.User)
 	supUser := new(pkg.SuperUser)
+	jrnl := new(pkg.Journal)
 	for update := range updates {
 
 		if update.Message != nil {
@@ -144,25 +148,27 @@ func main() {
 				keys.ReplyMarkup = nmShowVisiters
 				bot.Send(keys)
 			case "👁Кто в цеху":
-				// Функция вызывающая лист присутсвующих на текущий момент
-			case "📊Отчеты":
-				keys := tgbotapi.NewMessage(update.Message.Chat.ID, "")
+				resOut := jrnl.WhoInPlaceForBot()
+				msg := tgbotapi.NewMessage(update.Message.Chat.ID, resOut)
+				bot.Send(msg)
+			case "📊 Отчеты":
+				keys := tgbotapi.NewMessage(update.Message.Chat.ID, "Включил --->"+update.Message.Text)
 				keys.ReplyMarkup = nmKeyJournal
 				bot.Send(keys)
-			case "🛠Настройки":
-				keys := tgbotapi.NewMessage(update.Message.Chat.ID, update.Message.Text)
+			case "🛠 Настройки":
+				keys := tgbotapi.NewMessage(update.Message.Chat.ID, "Включил --->"+update.Message.Text)
 				keys.ReplyMarkup = nmKeySettings
 				bot.Send(keys)
-			case "👷🏽Сотрудники":
-				keys := tgbotapi.NewMessage(update.Message.Chat.ID, update.Message.Text)
+			case "👷🏽 Сотрудники":
+				keys := tgbotapi.NewMessage(update.Message.Chat.ID, "Включил --->"+update.Message.Text)
 				keys.ReplyMarkup = nmKeyEmpl
 				bot.Send(keys)
-			case "🦸🏻Администраторы":
-				keys := tgbotapi.NewMessage(update.Message.Chat.ID, update.Message.Text)
+			case "🦸🏻 Администраторы":
+				keys := tgbotapi.NewMessage(update.Message.Chat.ID, "Включил --->"+update.Message.Text)
 				keys.ReplyMarkup = nmKeyAdmin
 				bot.Send(keys)
-			case "🗄База данных":
-				keys := tgbotapi.NewMessage(update.Message.Chat.ID, update.Message.Text)
+			case "🗄 База данных":
+				keys := tgbotapi.NewMessage(update.Message.Chat.ID, "Включил --->"+update.Message.Text)
 				keys.ReplyMarkup = nmKeyDataBase
 				bot.Send(keys)
 			case "🔙 Вернуться":
@@ -170,7 +176,7 @@ func main() {
 				keys.ReplyMarkup = nmShowVisiters
 				bot.Send(keys)
 			// ТУТ ИДЕТ СЕРИЯ КЕЙСОВ ПО ОБРАБОТКЕ КОНЕЧНЫХ ПУНКТОВ МЕНЮ (Конечных кнопок!)
-			case "➕Добавить сотрудника": // ГОТОВО
+			case "➕ Добавить сотрудника": // ГОТОВО
 				msg.Text = "Для добавления нового сотрудника, введите данные в следующей последовательности \nНомер карты/ФИО Сотрудника/Должность сотрудника/Зарплата сотрудника через '/'\nПример: 485548845/Иванов Иван Иванович/Слесарь/45000"
 				bot.Send(msg)
 				for upd := range updates {
@@ -190,7 +196,7 @@ func main() {
 						}
 					}
 				}
-			case "❌Удалить сотрудника": // ГОТОВО
+			case "❌ Удалить сотрудника": // ГОТОВО
 				msg.Text = "Для того чтобы удалить администратора введите ФИО удаляемого сотрудника \nПример: Иванов Иван Иванович"
 				bot.Send(msg)
 				for upd := range updates {
@@ -210,12 +216,12 @@ func main() {
 						}
 					}
 				}
-			case "✏️Редактировать сотрудника": // TODO Доделать
-			case "🗂Список сотрудников": // ГОТОВО
+			case "✏️ Редактировать сотрудника": // TODO Доделать
+			case "🗂 Список сотрудников": // ГОТОВО
 				resOut := usr.ShowAllInBot()
 				msg := tgbotapi.NewMessage(update.Message.Chat.ID, resOut)
 				bot.Send(msg)
-			case "➕Добавить администратора": // ГОТОВО
+			case "➕ Добавить администратора": // ГОТОВО
 				msg.Text = "Для добавления нового Администратора, введите данные в следующей последовательности \nЛогин/Пароль/Почта через '/'\nПример: Admin/qwerty123/admin@mail.ru"
 				bot.Send(msg)
 				for upd := range updates {
@@ -235,7 +241,7 @@ func main() {
 						}
 					}
 				}
-			case "❌Удалить администратора": // ГОТОВО
+			case "❌ Удалить администратора": // ГОТОВО
 				msg.Text = "Для того чтобы удалить администратора введите лоин \nПример: Admin"
 				bot.Send(msg)
 				for upd := range updates {
@@ -255,15 +261,40 @@ func main() {
 						}
 					}
 				}
-			case "✏️Редактировать администратора":
-			case "🗂Список администраторов": //ГОТОВО
+			case "✏️ Редактировать администратора": // TODO Доделать
+			case "🗂 Список администраторов": //ГОТОВО
 				resOut := supUser.ShowAllInBot()
 				msg := tgbotapi.NewMessage(update.Message.Chat.ID, resOut)
 				bot.Send(msg)
-			case "🔌Создать новое подключение": // TODO Доделать
-			case "🧹Очистить базу данных": // TODO Доделать
-			case "📦Сделать бекап БД": // TODO Доделать
+			case "🔌 Создать новое подключение": // TODO Доделать
+			case "🧹 Очистить базу данных": // TODO Доделать
+			case "📦 Сделать бекап БД": // TODO Доделать
 			case "⚙️Посмотреть настройки подключения": // TODO Доделать
+			// * Подменю раздела "Отчеты"
+			case "📖 Журнал посещений":
+			case "💵 ЗП по сотруднику за период":
+			case "📆 Журнал посещения по сотруднику":
+			case "📤 Экспорт журнала в Excel":
+				msg.Text = "Укажите период за который нужно выгрузить журнал"
+				bot.Send(msg)
+				for upd := range updates {
+					msgIn := upd.Message.Text
+					if msgIn == "🔙 Вернуться" {
+						break
+					} else {
+						res := pkg.NumberValuator(msgIn)
+						if len(res) == 1 {
+							pkg.NewExcelExport(res[0])
+							file := tgbotapi.FilePath(set.ExcelFile)
+							msg := tgbotapi.NewDocument(update.Message.Chat.ID, file)
+							bot.Send(msg)
+						} else {
+							msg.Text = "⚠️Неверное количество аргументов для записи!\nПроверьте корректность внесенной информации!\nТребуется 1 значение"
+							bot.Send(msg)
+						}
+					}
+				}
+
 			}
 			// Send the message.
 
@@ -271,13 +302,10 @@ func main() {
 			// 	panic(err)
 			// }
 		} else if update.CallbackQuery != nil {
-			// Respond to the callback query, telling Telegram to show the user
-			// a message with the data received.
 			callback := tgbotapi.NewCallback(update.CallbackQuery.ID, update.CallbackQuery.Data)
 			if _, err := bot.Request(callback); err != nil {
 				panic(err)
 			}
-			// And finally, send a message containing the data received.
 			// msg := tgbotapi.NewMessage(update.CallbackQuery.Message.Chat.ID, update.CallbackQuery.Data)
 			// if _, err := bot.Send(msg); err != nil {
 			// 	panic(err)

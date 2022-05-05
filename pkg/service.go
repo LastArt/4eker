@@ -12,13 +12,15 @@ import (
 	"os/exec"
 	"strings"
 	"time"
+
+	"github.com/xuri/excelize/v2"
 )
 
 func NewScan() string {
 	in := bufio.NewScanner(os.Stdin)
 	in.Scan()
 	if err := in.Err(); err != nil {
-		fmt.Fprintln(os.Stderr, "Ошибка ввода:", err)
+		fmt.Fprintln(os.Stderr, set.ERROR_INPUT, err)
 	}
 
 	return in.Text()
@@ -28,7 +30,7 @@ func StringScan() string {
 	in := bufio.NewReader(os.Stdin)
 	str, err := in.ReadString('\n')
 	if err != nil {
-		fmt.Println("Ошибка ввода: ", err)
+		fmt.Println(set.ERROR_INPUT, err)
 	}
 	return str
 }
@@ -111,19 +113,21 @@ func Check(fio, cardnum, spec, dt, tm string) {
 	tg_key := GetKey(set.TokenFile)
 	c := New(tg_key)
 	chatId := -644032460
-	cText := ("🟢Отметился:  \n" + fio + "\nНомер: " + cardnum + "\nДолжность: " + spec + "\nДата: " + dt + "\nВремя: " + tm)
-	err := c.SendMessage(cText, int64(chatId))
-	if err != nil {
-		fmt.Println("ОШИБКА ОТПРАВКИ СООБЩЕНИЯ БОТУ: ", err)
+	if fio != "0" {
+		cText := ("🟢Отметился:  \n" + fio + "\nНомер: " + cardnum + "\nДолжность: " + spec + "\nДата: " + dt + "\nВремя: " + tm)
+		err := c.SendMessage(cText, int64(chatId))
+		if err != nil {
+			fmt.Println(set.ERROR_SEND_BOT, err)
+		}
 	}
 }
 
 func TmFormat() (string, string) {
-	tTime := time.Date(2022, time.Now().Month(), time.Now().Day(), time.Now().Hour(), time.Now().Minute(), 0, 0, time.Local)
+	timeFormat := time.Date(2022, time.Now().Month(), time.Now().Day(), time.Now().Hour(), time.Now().Minute(), 0, 0, time.Local)
 	//func Date(year int, month Month, day, hour, min, sec, nsec int, loc *Location) Time
-	tDate := tTime.Format("02.01.2006")
-	tT := tTime.Format("15:04")
-	return tDate, tT
+	dm := timeFormat.Format("02.01.2006")
+	tm := timeFormat.Format("15:04")
+	return dm, tm
 }
 
 //
@@ -135,7 +139,7 @@ func GetKey(path string) string {
 	var TG_token string
 	file, err := os.Open(path)
 	if err != nil {
-		fmt.Printf("ОШИБКА получения токена: ")
+		fmt.Printf(set.ERROR_TOKEN, err)
 		panic(err.Error())
 	}
 
@@ -149,4 +153,34 @@ func GetKey(path string) string {
 	TG_token = conf.TelegramBotToken
 
 	return TG_token
+}
+
+func NewExcelExport(data string) {
+	f := excelize.NewFile()
+
+	f.SetCellValue("Sheet1", "A1", "НОМЕР КАРТЫ")
+	f.SetCellValue("Sheet1", "B1", "ФИО")
+	f.SetCellValue("Sheet1", "C1", "СПЕЦИАЛЬНОСТЬ")
+	f.SetCellValue("Sheet1", "D1", "ДАТА ОТМЕТКИ")
+	f.SetCellValue("Sheet1", "E1", "ВРЕМЯ ОТМЕТКИ")
+
+	if err := f.SaveAs(set.ExcelFile); err != nil {
+		log.Fatal(err)
+	}
+
+}
+
+// Организовать зачистку файла после выдачи пользователю!
+func OldExcelDel() {
+	f := excelize.NewFile()
+
+	f.SetCellValue("Sheet1", "A1", "")
+	f.SetCellValue("Sheet1", "B1", "")
+	f.SetCellValue("Sheet1", "C1", "")
+	f.SetCellValue("Sheet1", "D1", "")
+	f.SetCellValue("Sheet1", "E1", "")
+
+	if err := f.SaveAs(set.ExcelFile); err != nil {
+		log.Fatal(err)
+	}
 }

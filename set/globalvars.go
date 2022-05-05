@@ -61,6 +61,7 @@ var DescrSettings string = `
 10. Редактировать суперпользователя
 11. Удалить суперпользователя
 12. Показать список суперпользователей
+13. Определить ключ доступа к телеграм боту
 `
 
 var (
@@ -74,4 +75,13 @@ var (
 	White      string = "\033[37m"
 )
 
-var TokenFile = "D:/GIT REP/TOKENS/key_checker.json"
+var TokenFile = "/home/artur/Projects/TOKENS/key_checker.json"
+var ExcelFile = "./export.xlsx"
+
+var (
+	ERROR_SEND_BOT    string = Red + "ОШИБКА ОТПРАВКИ СООБЩЕНИЯ БОТУ: " + ResetColor
+	ERROR_TOKEN       string = Red + "ОШИБКА ПОЛУЧЕНИЯ ТОКЕНА: " + ResetColor
+	BAD_ADMIN_ACCESS  string = Red + "НЕВЕРНЫЙ КОД ДОСТУПА" + ResetColor
+	ERROR_INPUT       string = Red + "ОШИБКА ВВОДА. НЕКОРРЕКТНЫЕ ДАННЫЕ" + ResetColor
+	ERROR_INSERT_TODB string = Red + "ОШИБКА ЗАПИСИ В БАЗУ ДАННЫХ: " + ResetColor
+)

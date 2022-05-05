@@ -28,7 +28,7 @@ L1:
 		adminPass = NewScan()
 		check = CheckAdminUser(adminPass)
 		if check != true {
-			fmt.Println("Доступ запрещен!")
+			fmt.Println(set.Red + set.AccesDenied + set.ResetColor)
 		} else {
 			GetSettings()
 		}
@@ -41,12 +41,13 @@ L1:
 			var usr = new(User)
 			//res, _ = strconv.Atoi(dataTime)
 			dt, tm := TmFormat()
+			fmt.Printf("dtRES : - %s\ntmRES : - %s", dt, tm)
 			whoEntered := usr.CheckInTimeValidation(dataTime)
 			usr.AdCheckinToDb(whoEntered[1], dt, tm)
 			Check(whoEntered[1], whoEntered[0], whoEntered[2], dt, tm)
 			goto L1
 		} else {
-			fmt.Println(string(set.Red), "Вы ввели некорректные данные попробуйте еще раз!", string(set.ResetColor))
+			fmt.Println(string(set.Red), set.ERROR_INPUT, string(set.ResetColor))
 			goto L1
 		}
 	}
@@ -115,5 +116,7 @@ func GetSettings() {
 		// Показать всех суперпользователей
 		var spusr = new(SuperUser)
 		spusr.ShowAll()
+	case "13":
+		fmt.Println("Настройка пути для файла tokena")
 	}
 }
