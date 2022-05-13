@@ -43,40 +43,36 @@ type Admin struct {
 	Email string
 }
 
-func CheckAdminUser(log, pass string) (bool, string) {
+func CheckAdminUser(log, pass string) bool {
 	var res bool = false
-	var pwd, lg, str string
+	var pwd, lg string
 	db, err := sql.Open("sqlite3", "./scud.db")
 	if err != nil {
 		panic(err)
 	}
 	defer db.Close()
-	rows, err := db.Query("SELECT * FROM superuser WHERE Login=? AND Password = ?", log, pass)
+	rows, err := db.Query("SELECT * FROM superuser WHERE Login=? AND Password =?", log, pass)
 	if err != nil {
 		panic(err)
 	}
 	defer rows.Close()
-	admins := []Admin{}
-
 	for rows.Next() {
-		p := Admin{}
+		p := new(Admin)
 		err := rows.Scan(&p.Id, &p.Login, &p.Pass, &p.Email)
 		if err != nil {
 			fmt.Println(err)
 			continue
 		}
-		admins = append(admins, p)
+		// admins = append(admins, p)
 		lg = p.Login
 		pwd = p.Pass
-
 	}
 	if lg == "" && pwd == "" {
-		str = "🚫 Доступ запрещен.\nНеверный логин или пароль!"
+		res = false
 	} else {
-		str = "✅ Доступ к настройкам открыт!"
 		res = true
 	}
-	return res, str
+	return res
 }
 
 func NumberValuator(msgIn string) []string {

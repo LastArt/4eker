@@ -27,7 +27,7 @@ L1:
 	if emplID == "--admin" {
 		fmt.Println(string(set.Yellow), "Введите пароль администратора", string(set.ResetColor))
 		adminPass = NewScan()
-		check, _ = CheckAdminUser(adminLog, adminPass) //! Проверить на предмет обновления принципа проверки!!!
+		check = CheckAdminUser(adminLog, adminPass) //! Проверить на предмет обновления принципа проверки!!!
 		if check != true {
 			fmt.Println(set.Red + set.AccesDenied + set.ResetColor)
 		} else {

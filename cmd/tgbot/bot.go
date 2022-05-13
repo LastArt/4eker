@@ -34,7 +34,7 @@ var nmKeyJournal = tgbotapi.NewReplyKeyboard(
 		tgbotapi.NewKeyboardButton("📆 Журнал посещения за период"), // За период
 	),
 	tgbotapi.NewKeyboardButtonRow(
-		tgbotapi.NewKeyboardButton("🔙 Вернуться"),
+		tgbotapi.NewKeyboardButton("↩️-Назад"),
 	),
 )
 var nmKeySettings = tgbotapi.NewReplyKeyboard(
@@ -48,7 +48,7 @@ var nmKeySettings = tgbotapi.NewReplyKeyboard(
 		tgbotapi.NewKeyboardButton("🗄 База данных"), //Открывает еще 3 кнопки nmKeyDataBase
 	),
 	tgbotapi.NewKeyboardButtonRow(
-		tgbotapi.NewKeyboardButton("🔙 Вернуться"),
+		tgbotapi.NewKeyboardButton("↩️-Назад"),
 	),
 )
 
@@ -67,7 +67,7 @@ var nmKeyEmpl = tgbotapi.NewReplyKeyboard(
 		tgbotapi.NewKeyboardButton("🗂 Список сотрудников"),
 	),
 	tgbotapi.NewKeyboardButtonRow(
-		tgbotapi.NewKeyboardButton("🔙 Вернуться"),
+		tgbotapi.NewKeyboardButton("↩️-Назад"),
 	),
 )
 
@@ -85,7 +85,7 @@ var nmKeyAdmin = tgbotapi.NewReplyKeyboard(
 		tgbotapi.NewKeyboardButton("🗂 Список администраторов"),
 	),
 	tgbotapi.NewKeyboardButtonRow(
-		tgbotapi.NewKeyboardButton("🔙 Вернуться"),
+		tgbotapi.NewKeyboardButton("↩️-Назад"),
 	),
 )
 
@@ -103,7 +103,7 @@ var nmKeyDataBase = tgbotapi.NewReplyKeyboard(
 		tgbotapi.NewKeyboardButton("⚙️ Посмотреть настройки подключения"),
 	),
 	tgbotapi.NewKeyboardButtonRow(
-		tgbotapi.NewKeyboardButton("🔙 Вернуться"),
+		tgbotapi.NewKeyboardButton("↩️-Назад"),
 	),
 )
 
@@ -138,12 +138,13 @@ func main() {
 			msg := tgbotapi.NewMessage(update.Message.Chat.ID, update.Message.Text)
 			// SWITCH.
 			msgGenaral := update.Message.Text
-			log.Println("msgGeneral -> ", msgGenaral)
+			log.Println("LOG -> ", msgGenaral)
 			switch update.Message.Text {
-			case "/start":
+			case "/startmenu":
 				keys := tgbotapi.NewMessage(update.Message.Chat.ID, update.Message.Text)
 				keys.ReplyMarkup = nmShowVisiters
 				bot.Send(keys)
+				break
 			case "👁Кто в цеху":
 				resOut := jrnl.WhoInPlaceForBot()
 				msg := tgbotapi.NewMessage(update.Message.Chat.ID, resOut)
@@ -154,28 +155,27 @@ func main() {
 				bot.Send(keys)
 			case "🛠 Настройки":
 				var bln bool
-				var str string
-				msg.Text = "🔐 Для доступа в раздел настроек введите логин и пароль \nПример: Admin/qwerty123"
+				msg.Text = "🔐 АВТОРИЗАЦИЯ\nДля доступа в раздел настроек введите логин и пароль \nПример: Admin/qwerty123"
 				bot.Send(msg)
 				for upd := range updates {
 					msgIn := upd.Message.Text
-					if msgIn == "🔙 Вернуться" {
+					if msgIn == "↩️-Назад" {
 						break
 					} else {
 						res := pkg.NumberValuator(msgIn)
 						if len(res) == 2 {
-							bln, str = pkg.CheckAdminUser(res[0], res[1])
+							bln = pkg.CheckAdminUser(res[0], res[1])
 							if bln != true {
-								msg := tgbotapi.NewMessage(update.Message.Chat.ID, str)
+								msg := tgbotapi.NewMessage(update.Message.Chat.ID, "⛔️ Доступ запрещен!\nНеверный логин или пароль!")
 								bot.Send(msg)
+								break
 							} else {
-								keys := tgbotapi.NewMessage(update.Message.Chat.ID, str)
+								keys := tgbotapi.NewMessage(update.Message.Chat.ID, "✅ Доступ открыт!")
 								keys.ReplyMarkup = nmKeySettings
 								bot.Send(keys)
 							}
-
 						} else {
-							msg.Text = "⚠️Неверное количество аргументов для записи!\nПроверьте корректность внесенной информации!\nТребуется 1 значение"
+							msg.Text = "⚠️Неверное количество аргументов для записи!\nПроверьте корректность внесенной информации!"
 							bot.Send(msg)
 						}
 					}
@@ -193,7 +193,7 @@ func main() {
 				keys := tgbotapi.NewMessage(update.Message.Chat.ID, "Включил --->"+update.Message.Text)
 				keys.ReplyMarkup = nmKeyDataBase
 				bot.Send(keys)
-			case "🔙 Вернуться":
+			case "↩️-Назад":
 				keys := tgbotapi.NewMessage(update.Message.Chat.ID, update.Message.Text)
 				keys.ReplyMarkup = nmShowVisiters
 				bot.Send(keys)
@@ -203,7 +203,7 @@ func main() {
 				bot.Send(msg)
 				for upd := range updates {
 					msgIn := upd.Message.Text
-					if msgIn == "🔙 Вернуться" {
+					if msgIn == "↩️-Назад" {
 						break
 					} else {
 						res := pkg.NumberValuator(msgIn)
@@ -223,7 +223,7 @@ func main() {
 				bot.Send(msg)
 				for upd := range updates {
 					msgIn := upd.Message.Text
-					if msgIn == "🔙 Вернуться" {
+					if msgIn == "↩️-Назад" {
 						break
 					} else {
 						res := pkg.NumberValuator(msgIn)
@@ -248,7 +248,7 @@ func main() {
 				bot.Send(msg)
 				for upd := range updates {
 					msgIn := upd.Message.Text
-					if msgIn == "🔙 Вернуться" {
+					if msgIn == "↩️-Назад" {
 						break
 					} else {
 						res := pkg.NumberValuator(msgIn)
@@ -268,7 +268,7 @@ func main() {
 				bot.Send(msg)
 				for upd := range updates {
 					msgIn := upd.Message.Text
-					if msgIn == "🔙 Вернуться" {
+					if msgIn == "↩️-Назад" {
 						break
 					} else {
 						res := pkg.NumberValuator(msgIn)
@@ -299,7 +299,7 @@ func main() {
 				bot.Send(msg)
 				for upd := range updates {
 					msgIn := upd.Message.Text
-					if msgIn == "🔙 Вернуться" {
+					if msgIn == "↩️-Назад" {
 						break
 					} else {
 						res := pkg.NumberValuator(msgIn)
@@ -322,7 +322,7 @@ func main() {
 				bot.Send(msg)
 				for upd := range updates {
 					msgIn := upd.Message.Text
-					if msgIn == "🔙 Вернуться" {
+					if msgIn == "   ↩️   " {
 						break
 					} else {
 						res := pkg.NumberValuator(msgIn)
