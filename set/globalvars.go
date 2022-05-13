@@ -75,7 +75,7 @@ var (
 	White      string = "\033[37m"
 )
 
-var TokenFile = "/home/artur/Projects/TOKENS/key_checker.json"
+var TokenFile = "/home/lastart/bot_token.json"
 var ExcelFile = "./export.xlsx"
 
 var (

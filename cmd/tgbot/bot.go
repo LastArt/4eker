@@ -25,16 +25,13 @@ var nmShowVisiters = tgbotapi.NewReplyKeyboard( // Показывает журн
 
 var nmKeyJournal = tgbotapi.NewReplyKeyboard(
 	tgbotapi.NewKeyboardButtonRow(
-		tgbotapi.NewKeyboardButton("📖 Журнал посещений"), // За период
+		tgbotapi.NewKeyboardButton("📖 Журнал посещений по сотруднику за период"), // За период
 	),
 	tgbotapi.NewKeyboardButtonRow(
 		tgbotapi.NewKeyboardButton("💵 ЗП по сотруднику за период"), // За период
 	),
 	tgbotapi.NewKeyboardButtonRow(
-		tgbotapi.NewKeyboardButton("📆 Журнал посещения по сотруднику"), // За период
-	),
-	tgbotapi.NewKeyboardButtonRow(
-		tgbotapi.NewKeyboardButton("📤 Экспорт журнала в Excel"), // За период/ По сотруднику / По дате
+		tgbotapi.NewKeyboardButton("📆 Журнал посещения за период"), // За период
 	),
 	tgbotapi.NewKeyboardButtonRow(
 		tgbotapi.NewKeyboardButton("🔙 Вернуться"),
@@ -156,9 +153,34 @@ func main() {
 				keys.ReplyMarkup = nmKeyJournal
 				bot.Send(keys)
 			case "🛠 Настройки":
-				keys := tgbotapi.NewMessage(update.Message.Chat.ID, "Включил --->"+update.Message.Text)
-				keys.ReplyMarkup = nmKeySettings
-				bot.Send(keys)
+				var bln bool
+				var str string
+				msg.Text = "🔐 Для доступа в раздел настроек введите логин и пароль \nПример: Admin/qwerty123"
+				bot.Send(msg)
+				for upd := range updates {
+					msgIn := upd.Message.Text
+					if msgIn == "🔙 Вернуться" {
+						break
+					} else {
+						res := pkg.NumberValuator(msgIn)
+						if len(res) == 2 {
+							bln, str = pkg.CheckAdminUser(res[0], res[1])
+							if bln != true {
+								msg := tgbotapi.NewMessage(update.Message.Chat.ID, str)
+								bot.Send(msg)
+							} else {
+								keys := tgbotapi.NewMessage(update.Message.Chat.ID, str)
+								keys.ReplyMarkup = nmKeySettings
+								bot.Send(keys)
+							}
+
+						} else {
+							msg.Text = "⚠️Неверное количество аргументов для записи!\nПроверьте корректность внесенной информации!\nТребуется 1 значение"
+							bot.Send(msg)
+						}
+					}
+				}
+
 			case "👷🏽 Сотрудники":
 				keys := tgbotapi.NewMessage(update.Message.Chat.ID, "Включил --->"+update.Message.Text)
 				keys.ReplyMarkup = nmKeyEmpl
@@ -242,7 +264,7 @@ func main() {
 					}
 				}
 			case "❌ Удалить администратора": // ГОТОВО
-				msg.Text = "Для того чтобы удалить администратора введите лоин \nПример: Admin"
+				msg.Text = "Для того чтобы удалить администратора введите логин \nПример: Admin"
 				bot.Send(msg)
 				for upd := range updates {
 					msgIn := upd.Message.Text
@@ -266,16 +288,14 @@ func main() {
 				resOut := supUser.ShowAllInBot()
 				msg := tgbotapi.NewMessage(update.Message.Chat.ID, resOut)
 				bot.Send(msg)
+			// * Подменю раздела "База данных"
 			case "🔌 Создать новое подключение": // TODO Доделать
 			case "🧹 Очистить базу данных": // TODO Доделать
 			case "📦 Сделать бекап БД": // TODO Доделать
 			case "⚙️Посмотреть настройки подключения": // TODO Доделать
 			// * Подменю раздела "Отчеты"
-			case "📖 Журнал посещений":
-			case "💵 ЗП по сотруднику за период":
-			case "📆 Журнал посещения по сотруднику":
-			case "📤 Экспорт журнала в Excel":
-				msg.Text = "Укажите период за который нужно выгрузить журнал"
+			case "📖 Журнал посещений по сотруднику за период":
+				msg.Text = "ℹ️ Укажите ФИО сотрудника и период за который нужно выгрузить журнал\nПример записи: 01.05.2022/13.05.2022/Иванов Иван Иванович"
 				bot.Send(msg)
 				for upd := range updates {
 					msgIn := upd.Message.Text
@@ -283,8 +303,8 @@ func main() {
 						break
 					} else {
 						res := pkg.NumberValuator(msgIn)
-						if len(res) == 1 {
-							pkg.NewExcelExport(res[0])
+						if len(res) == 3 {
+							pkg.PresentJournalToEmpl(res[0], res[1], res[2])
 							file := tgbotapi.FilePath(set.ExcelFile)
 							msg := tgbotapi.NewDocument(update.Message.Chat.ID, file)
 							bot.Send(msg)
@@ -294,7 +314,29 @@ func main() {
 						}
 					}
 				}
-
+			case "💵 ЗП по сотруднику за период":
+				msg.Text = "⚠️ Данный раздел находится в разработке!"
+				bot.Send(msg)
+			case "📆 Журнал посещения за период":
+				msg.Text = "ℹ️ Укажите период за который нужно выгрузить журнал \nПример записи: 01.05.2022/13.05.2022"
+				bot.Send(msg)
+				for upd := range updates {
+					msgIn := upd.Message.Text
+					if msgIn == "🔙 Вернуться" {
+						break
+					} else {
+						res := pkg.NumberValuator(msgIn)
+						if len(res) == 2 {
+							pkg.PresentJournalToDay(res[0], res[1])
+							file := tgbotapi.FilePath(set.ExcelFile)
+							msg := tgbotapi.NewDocument(update.Message.Chat.ID, file)
+							bot.Send(msg)
+						} else {
+							msg.Text = "⚠️Неверное количество аргументов для записи!\nПроверьте корректность внесенной информации!\nТребуется 1 значение"
+							bot.Send(msg)
+						}
+					}
+				}
 			}
 			// Send the message.
 

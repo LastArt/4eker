@@ -9,7 +9,7 @@ import (
 
 func GetStart() {
 
-	var dataTime, adminPass string
+	var emplID, adminLog, adminPass string
 	//var res int
 	var check bool
 	//t := time.Now()
@@ -21,12 +21,13 @@ func GetStart() {
 	fmt.Println(string(set.Yellow), set.Sublogo, string(set.ResetColor))
 	fmt.Println(set.Descr)
 L1:
-	fmt.Scan(&dataTime)
-	isNumbers := reg.MatchString(dataTime)
-	if dataTime == "--admin" {
+	emplID = NewScan()
+
+	isNumbers := reg.MatchString(emplID)
+	if emplID == "--admin" {
 		fmt.Println(string(set.Yellow), "Введите пароль администратора", string(set.ResetColor))
 		adminPass = NewScan()
-		check = CheckAdminUser(adminPass)
+		check, _ = CheckAdminUser(adminLog, adminPass) //! Проверить на предмет обновления принципа проверки!!!
 		if check != true {
 			fmt.Println(set.Red + set.AccesDenied + set.ResetColor)
 		} else {
@@ -40,10 +41,12 @@ L1:
 		if isNumbers {
 			var usr = new(User)
 			//res, _ = strconv.Atoi(dataTime)
-			dt, tm := TmFormat()
+			datetime := TmFormat()
+			dt := datetime.Format("02.01.2006")
+			tm := datetime.Format("15:04")
 			fmt.Printf("dtRES : - %s\ntmRES : - %s", dt, tm)
-			whoEntered := usr.CheckInTimeValidation(dataTime)
-			usr.AdCheckinToDb(whoEntered[1], dt, tm)
+			whoEntered := usr.CheckInTimeValidation(emplID)
+			usr.AdCheckinToDb(whoEntered[1], datetime)
 			Check(whoEntered[1], whoEntered[0], whoEntered[2], dt, tm)
 			goto L1
 		} else {

@@ -6,6 +6,7 @@ import (
 	"kontroller/set"
 	"log"
 	"os"
+	"time"
 
 	_ "github.com/mattn/go-sqlite3"
 	"github.com/olekukonko/tablewriter"
@@ -398,12 +399,15 @@ func (u User) CheckInTimeValidation(cardnum string) []string { // Определ
 	return str
 }
 
-func (u User) AdCheckinToDb(fio, dt, tm string) { // Записываем трек в бд
+func (u User) AdCheckinToDb(fio string, datetime time.Time) { // Записываем трек в бд
 	db, err := sql.Open("sqlite3", "./scud.db")
 	if err != nil {
 		panic(err)
 	}
 	defer db.Close()
+
+	dt := datetime.Format("02.01.2006")
+	tm := datetime.Format("15:04")
 	_, err = db.Exec("INSERT INTO journal (FioVisiter, Date, Time) values (?, ?, ?)", fio, dt, tm)
 	if err != nil {
 		fmt.Println(set.ERROR_INSERT_TODB, err)
@@ -414,15 +418,18 @@ func (u User) AdCheckinToDb(fio, dt, tm string) { // Записываем тре
 
 // Метод выводящий в консоль всех присутсвующих на текущую дату.
 func (j Journal) WhoInPlace() {
-	today, totime := TmFormat()
+	datetime := TmFormat()
+	dt := datetime.Format("02.01.2006")
+	tm := datetime.Format("15:04")
 	var id string
-	fmt.Println("Сегодня: ", today)
+	fmt.Println("Сегодня: ", dt)
 	db, err := sql.Open("sqlite3", "./scud.db")
 	if err != nil {
 		panic(err)
 	}
 	defer db.Close()
-	rows, err := db.Query("SELECT * FROM journal WHERE Date = ? AND Time < ?", today, totime) // Требуется доработка SQL запроса Вывести список сотрудников За сегодня и За время с 8 утра до текущего часа
+
+	rows, err := db.Query("SELECT * FROM journal WHERE Date = ? AND Time < ?", dt, tm) // Требуется доработка SQL запроса Вывести список сотрудников За сегодня и За время с 8 утра до текущего часа
 	if err != nil {
 		panic(err)
 	}
@@ -433,13 +440,15 @@ func (j Journal) WhoInPlace() {
 	for rows.Next() {
 		p := Journal{}
 		err := rows.Scan(&id, &j.User.Fio, &j.Date, &j.Time)
-		j.Date, _ = TmFormat()
+		//jDt := j.Date.Format("02.01.2006") //!  Внес поправку для тестирования нового формата
 		if err != nil {
 			fmt.Println(err)
 			continue
 		}
 		journals = append(journals, p)
+
 		data := [][]string{
+
 			[]string{id, j.User.Fio, j.Date, j.Time},
 		}
 		for _, v := range data {
@@ -450,17 +459,20 @@ func (j Journal) WhoInPlace() {
 
 }
 
+// Метод выводящий в бот всех присутсвующих на текущую дату.
 func (j Journal) WhoInPlaceForBot() string {
 
-	today, totime := TmFormat()
+	datetime := TmFormat()
+	dt := datetime.Format("02.01.2006")
+	tm := datetime.Format("15:04")
 	var id string
-	fmt.Println("Сегодня: ", today)
+	fmt.Println("Сегодня: ", dt)
 	db, err := sql.Open("sqlite3", "./scud.db")
 	if err != nil {
 		panic(err)
 	}
 	defer db.Close()
-	rows, err := db.Query("SELECT * FROM journal WHERE Date = ? AND Time < ?", today, totime)
+	rows, err := db.Query("SELECT * FROM journal WHERE Date = ? AND Time < ?", dt, tm)
 	if err != nil {
 		panic(err)
 	}
@@ -473,7 +485,6 @@ func (j Journal) WhoInPlaceForBot() string {
 			fmt.Println(err)
 			continue
 		}
-		//j.Date, _ = TmFormat()
 		str += "\nID: " + id + "\nФИО: " + j.User.Fio + "\nДата отметки: " + j.Date + "\nВремя отметки: " + j.Time + "\n=====================\n"
 	}
 	return str

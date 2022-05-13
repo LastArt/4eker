@@ -10,6 +10,7 @@ import (
 	"log"
 	"os"
 	"os/exec"
+	"strconv"
 	"strings"
 	"time"
 
@@ -42,15 +43,15 @@ type Admin struct {
 	Email string
 }
 
-func CheckAdminUser(pass string) bool {
-	var pwd string
+func CheckAdminUser(log, pass string) (bool, string) {
 	var res bool = false
+	var pwd, lg, str string
 	db, err := sql.Open("sqlite3", "./scud.db")
 	if err != nil {
 		panic(err)
 	}
 	defer db.Close()
-	rows, err := db.Query("SELECT * FROM superuser WHERE Password = ?", pass)
+	rows, err := db.Query("SELECT * FROM superuser WHERE Login=? AND Password = ?", log, pass)
 	if err != nil {
 		panic(err)
 	}
@@ -65,15 +66,17 @@ func CheckAdminUser(pass string) bool {
 			continue
 		}
 		admins = append(admins, p)
+		lg = p.Login
 		pwd = p.Pass
 
 	}
-	if pwd == "" {
-		fmt.Println("Неверный код доступа!")
+	if lg == "" && pwd == "" {
+		str = "🚫 Доступ запрещен.\nНеверный логин или пароль!"
 	} else {
+		str = "✅ Доступ к настройкам открыт!"
 		res = true
 	}
-	return res
+	return res, str
 }
 
 func NumberValuator(msgIn string) []string {
@@ -122,12 +125,12 @@ func Check(fio, cardnum, spec, dt, tm string) {
 	}
 }
 
-func TmFormat() (string, string) {
+func TmFormat() time.Time {
 	timeFormat := time.Date(2022, time.Now().Month(), time.Now().Day(), time.Now().Hour(), time.Now().Minute(), 0, 0, time.Local)
 	//func Date(year int, month Month, day, hour, min, sec, nsec int, loc *Location) Time
-	dm := timeFormat.Format("02.01.2006")
-	tm := timeFormat.Format("15:04")
-	return dm, tm
+	// dm := timeFormat.Format("02.01.2006")
+	// tm := timeFormat.Format("15:04")
+	return timeFormat
 }
 
 //
@@ -155,30 +158,80 @@ func GetKey(path string) string {
 	return TG_token
 }
 
-func NewExcelExport(data string) {
+// Журнал посещений за период
+func PresentJournalToDay(data1, data2 string) {
 	f := excelize.NewFile()
-
-	f.SetCellValue("Sheet1", "A1", "НОМЕР КАРТЫ")
+	f.SetCellValue("Sheet1", "A1", "ID")
 	f.SetCellValue("Sheet1", "B1", "ФИО")
-	f.SetCellValue("Sheet1", "C1", "СПЕЦИАЛЬНОСТЬ")
-	f.SetCellValue("Sheet1", "D1", "ДАТА ОТМЕТКИ")
-	f.SetCellValue("Sheet1", "E1", "ВРЕМЯ ОТМЕТКИ")
+	f.SetCellValue("Sheet1", "C1", "ДАТА ОТМЕТКИ")
+	f.SetCellValue("Sheet1", "D1", "ВРЕМЯ ОТМЕТКИ")
+
+	jrnl := new(Journal)
+	var id string
+
+	db, err := sql.Open("sqlite3", "./scud.db")
+	if err != nil {
+		panic(err)
+	}
+	defer db.Close()
+	rows, err := db.Query("SELECT * FROM journal WHERE Date BETWEEN ? AND  ? ", data1, data2)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer rows.Close()
+	for i := 2; rows.Next(); i++ {
+		err := rows.Scan(&id, &jrnl.User.Fio, &jrnl.Date, &jrnl.Time)
+		if err != nil {
+			fmt.Println(err)
+			continue
+		}
+
+		f.SetCellValue("Sheet1", "A"+strconv.Itoa(i), id)
+		f.SetCellValue("Sheet1", "B"+strconv.Itoa(i), jrnl.User.Fio)
+		f.SetCellValue("Sheet1", "C"+strconv.Itoa(i), jrnl.Date)
+		f.SetCellValue("Sheet1", "D"+strconv.Itoa(i), jrnl.Time)
+
+	}
 
 	if err := f.SaveAs(set.ExcelFile); err != nil {
 		log.Fatal(err)
 	}
-
 }
 
-// Организовать зачистку файла после выдачи пользователю!
-func OldExcelDel() {
+// Журнал посещений по сотруднику за период
+func PresentJournalToEmpl(data1, data2, fio string) {
 	f := excelize.NewFile()
+	f.SetCellValue("Sheet1", "A1", "ID")
+	f.SetCellValue("Sheet1", "B1", "ФИО")
+	f.SetCellValue("Sheet1", "C1", "ДАТА ОТМЕТКИ")
+	f.SetCellValue("Sheet1", "D1", "ВРЕМЯ ОТМЕТКИ")
 
-	f.SetCellValue("Sheet1", "A1", "")
-	f.SetCellValue("Sheet1", "B1", "")
-	f.SetCellValue("Sheet1", "C1", "")
-	f.SetCellValue("Sheet1", "D1", "")
-	f.SetCellValue("Sheet1", "E1", "")
+	jrnl := new(Journal)
+	var id string
+
+	db, err := sql.Open("sqlite3", "./scud.db")
+	if err != nil {
+		panic(err)
+	}
+	defer db.Close()
+	rows, err := db.Query("SELECT * FROM journal WHERE Date BETWEEN ? AND  ? AND FioVisiter=? ", data1, data2, fio)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer rows.Close()
+	for i := 2; rows.Next(); i++ {
+		err := rows.Scan(&id, &jrnl.User.Fio, &jrnl.Date, &jrnl.Time)
+		if err != nil {
+			fmt.Println(err)
+			continue
+		}
+
+		f.SetCellValue("Sheet1", "A"+strconv.Itoa(i), id)
+		f.SetCellValue("Sheet1", "B"+strconv.Itoa(i), jrnl.User.Fio)
+		f.SetCellValue("Sheet1", "C"+strconv.Itoa(i), jrnl.Date)
+		f.SetCellValue("Sheet1", "D"+strconv.Itoa(i), jrnl.Time)
+
+	}
 
 	if err := f.SaveAs(set.ExcelFile); err != nil {
 		log.Fatal(err)
