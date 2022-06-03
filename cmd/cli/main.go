@@ -1,7 +1,7 @@
 package main
 
 import (
-	"kontroller/pkg"
+	"4eker/pkg"
 
 	_ "github.com/mattn/go-sqlite3"
 )

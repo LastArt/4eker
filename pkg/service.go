@@ -1,12 +1,12 @@
 package pkg
 
 import (
+	"4eker/set"
 	"bufio"
 	"bytes"
 	"database/sql"
 	"encoding/json"
 	"fmt"
-	"kontroller/set"
 	"log"
 	"os"
 	"os/exec"
@@ -66,6 +66,8 @@ func CheckAdminUser(log, pass string) bool {
 		// admins = append(admins, p)
 		lg = p.Login
 		pwd = p.Pass
+		fmt.Printf("Логин - %s", lg)
+		fmt.Printf("\nПароль - %s", pwd)
 	}
 	if lg == "" && pwd == "" {
 		res = false

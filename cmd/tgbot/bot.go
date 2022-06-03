@@ -1,8 +1,8 @@
 package main
 
 import (
-	"kontroller/pkg"
-	"kontroller/set"
+	"4eker/pkg"
+	"4eker/set"
 	"log"
 
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"

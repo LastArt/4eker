@@ -1,9 +1,9 @@
 package pkg
 
 import (
+	"4eker/set"
 	"database/sql"
 	"fmt"
-	"kontroller/set"
 	"log"
 	"os"
 	"time"
