@@ -3,19 +3,56 @@ package pkg
 import (
 	"4eker/set"
 	"bufio"
-	"bytes"
 	"database/sql"
 	"encoding/json"
 	"fmt"
 	"log"
 	"os"
-	"os/exec"
 	"strconv"
 	"strings"
 	"time"
 
+	_ "github.com/mattn/go-sqlite3"
 	"github.com/xuri/excelize/v2"
 )
+
+type Admin struct {
+	Id    string
+	Login string
+	Pass  string
+	Email string
+}
+type User struct {
+	Cardid     string
+	Fio        string
+	Speciality string
+	Salary     string
+}
+
+type Journal struct {
+	Date string
+	Time string
+	User User
+}
+
+type SuperUser struct {
+	id    string
+	Login string
+	Pass  string
+	Email string
+}
+
+type EmplChanger interface {
+	Add()
+	Edit()
+	AddInBot()
+	DeleteRow()
+	ClearDB()
+	ShowAll()
+	DeleteRowInBot()
+	ShowAllInBot()
+	EditFromBot()
+}
 
 func NewScan() string {
 	in := bufio.NewScanner(os.Stdin)
@@ -34,13 +71,6 @@ func StringScan() string {
 		fmt.Println(set.ERROR_INPUT, err)
 	}
 	return str
-}
-
-type Admin struct {
-	Id    string
-	Login string
-	Pass  string
-	Email string
 }
 
 func CheckAdminUser(log, pass string) bool {
@@ -66,8 +96,6 @@ func CheckAdminUser(log, pass string) bool {
 		// admins = append(admins, p)
 		lg = p.Login
 		pwd = p.Pass
-		fmt.Printf("Логин - %s", lg)
-		fmt.Printf("\nПароль - %s", pwd)
 	}
 	if lg == "" && pwd == "" {
 		res = false
@@ -83,7 +111,6 @@ func NumberValuator(msgIn string) []string {
 	for _, i := range words {
 		res = append(res, i)
 	}
-
 	return res
 }
 
@@ -91,51 +118,18 @@ func Question() {
 	var do string
 	fmt.Println("Для выхода нажмите В-[Выход] для продолжения работы нажмите любую кнопку и Enter")
 	fmt.Scan(&do)
-
-	if do == "В" {
+	if do == "В" || do == "в" {
 		GetStart()
 	}
-	GetSettings()
-}
-
-func ClearConsole() {
-	cmd := exec.Command("tr", "a-z", "A-Z")
-	cmd.Stdin = strings.NewReader("clear")
-	var out bytes.Buffer
-	cmd.Stdout = &out
-	err := cmd.Run()
-	if err != nil {
-		log.Fatal(err)
-	}
-	out.String()
-}
-
-func Check(fio, cardnum, spec, dt, tm string) {
-	tg_key := GetKey(set.TokenFile)
-	c := New(tg_key)
-	chatId := -644032460
-	if fio != "0" {
-		cText := ("🟢Отметился:  \n" + fio + "\nНомер: " + cardnum + "\nДолжность: " + spec + "\nДата: " + dt + "\nВремя: " + tm)
-		err := c.SendMessage(cText, int64(chatId))
-		if err != nil {
-			fmt.Println(set.ERROR_SEND_BOT, err)
-		}
-	}
+	GetCliMenu()
 }
 
 func TmFormat() time.Time {
 	timeFormat := time.Date(2022, time.Now().Month(), time.Now().Day(), time.Now().Hour(), time.Now().Minute(), 0, 0, time.Local)
-	//func Date(year int, month Month, day, hour, min, sec, nsec int, loc *Location) Time
-	// dm := timeFormat.Format("02.01.2006")
-	// tm := timeFormat.Format("15:04")
 	return timeFormat
 }
 
-//
-type Config struct {
-	TelegramBotToken string
-}
-
+// Допфункция для получения ключа из json файла
 func GetKey(path string) string {
 	var TG_token string
 	file, err := os.Open(path)
@@ -156,7 +150,7 @@ func GetKey(path string) string {
 	return TG_token
 }
 
-// Журнал посещений за период
+// Формируем журнал посещений за период
 func PresentJournalToDay(data1, data2 string) {
 	f := excelize.NewFile()
 	f.SetCellValue("Sheet1", "A1", "ID")
@@ -196,7 +190,7 @@ func PresentJournalToDay(data1, data2 string) {
 	}
 }
 
-// Журнал посещений по сотруднику за период
+// Формируем журнал посещений по сотруднику за период
 func PresentJournalToEmpl(data1, data2, fio string) {
 	f := excelize.NewFile()
 	f.SetCellValue("Sheet1", "A1", "ID")
@@ -233,5 +227,36 @@ func PresentJournalToEmpl(data1, data2, fio string) {
 
 	if err := f.SaveAs(set.ExcelFile); err != nil {
 		log.Fatal(err)
+	}
+}
+
+// Формируем журнал посещений  за период
+func (j Journal) ExportToExcel() {
+	db, err := sql.Open("sqlite3", "./scud.db")
+	if err != nil {
+		panic(err)
+	}
+	defer db.Close()
+
+	rows, err := db.Query("SELECT * FROM journal WHERE Data = ?")
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer rows.Close()
+}
+
+//Запись отметки в бд
+func (u User) AdCheckinToDb(fio string, datetime time.Time) {
+	db, err := sql.Open("sqlite3", "./scud.db")
+	if err != nil {
+		panic(err)
+	}
+	defer db.Close()
+
+	dt := datetime.Format("02.01.2006")
+	tm := datetime.Format("15:04")
+	_, err = db.Exec("INSERT INTO journal (FioVisiter, Date, Time) values (?, ?, ?)", fio, dt, tm)
+	if err != nil {
+		fmt.Println(set.ERROR_INSERT_TODB, err)
 	}
 }

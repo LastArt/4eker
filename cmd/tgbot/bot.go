@@ -3,6 +3,8 @@ package main
 import (
 	"4eker/pkg"
 	"4eker/set"
+	"flag"
+	"fmt"
 	"log"
 
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
@@ -28,9 +30,6 @@ var nmKeyJournal = tgbotapi.NewReplyKeyboard(
 		tgbotapi.NewKeyboardButton("📖 Журнал посещений по сотруднику за период"), // За период
 	),
 	tgbotapi.NewKeyboardButtonRow(
-		tgbotapi.NewKeyboardButton("💵 ЗП по сотруднику за период"), // За период
-	),
-	tgbotapi.NewKeyboardButtonRow(
 		tgbotapi.NewKeyboardButton("📆 Журнал посещения за период"), // За период
 	),
 	tgbotapi.NewKeyboardButtonRow(
@@ -43,9 +42,6 @@ var nmKeySettings = tgbotapi.NewReplyKeyboard(
 	),
 	tgbotapi.NewKeyboardButtonRow(
 		tgbotapi.NewKeyboardButton("🦸🏻 Администраторы"), //Открывает еще 3 кнопки nmKeyAdmin
-	),
-	tgbotapi.NewKeyboardButtonRow(
-		tgbotapi.NewKeyboardButton("🗄 База данных"), //Открывает еще 3 кнопки nmKeyDataBase
 	),
 	tgbotapi.NewKeyboardButtonRow(
 		tgbotapi.NewKeyboardButton("↩️-Назад"),
@@ -89,24 +85,6 @@ var nmKeyAdmin = tgbotapi.NewReplyKeyboard(
 	),
 )
 
-var nmKeyDataBase = tgbotapi.NewReplyKeyboard(
-	tgbotapi.NewKeyboardButtonRow(
-		tgbotapi.NewKeyboardButton("🔌 Создать новое подключение"),
-	),
-	tgbotapi.NewKeyboardButtonRow(
-		tgbotapi.NewKeyboardButton("🧹 Очистить базу данных"),
-	),
-	tgbotapi.NewKeyboardButtonRow(
-		tgbotapi.NewKeyboardButton("📦 Сделать бекап БД"),
-	),
-	tgbotapi.NewKeyboardButtonRow(
-		tgbotapi.NewKeyboardButton("⚙️ Посмотреть настройки подключения"),
-	),
-	tgbotapi.NewKeyboardButtonRow(
-		tgbotapi.NewKeyboardButton("↩️-Назад"),
-	),
-)
-
 // ============== ИНЛАЙН КНОПКИ ============================
 var exitKey = tgbotapi.NewInlineKeyboardMarkup(
 	tgbotapi.NewInlineKeyboardRow(
@@ -117,45 +95,50 @@ var exitKey = tgbotapi.NewInlineKeyboardMarkup(
 //=============== КОНЕЦ БЛОКА С ИНЛАЙН КНОПКАМИ =============
 
 func main() {
-	bot, _ := tgbotapi.NewBotAPI(pkg.GetKey(set.TokenFile))
+	var token string
+	flag.StringVar(&token, "apikey", "---", "Токен телеграм бота")
+
+	flag.Parse()
+	if token == "---" {
+		fmt.Println("Введите токен!")
+	}
+
+	bot, _ := tgbotapi.NewBotAPI(token)
 
 	u := tgbotapi.NewUpdate(0)
 	u.Timeout = 60
 
 	updates := bot.GetUpdatesChan(u)
 
-	log.Printf("Authorized on account %s", bot.Self.UserName)
-	//log.Printf("ChatID%s", ch)
+	log.Printf("Запуск бота '%s' успешно выполнен!", bot.Self.UserName)
+	log.Printf("ID чата")
+	log.Printf("ChatID%s", updates)
 
 	usr := new(pkg.User)
 	supUser := new(pkg.SuperUser)
 	jrnl := new(pkg.Journal)
 	for update := range updates {
-
 		if update.Message != nil {
-
-			//msg := tgbotapi.NewMessage(update.Message.Chat.ID, "Введена команда:"+update.Message.Text)
 			msg := tgbotapi.NewMessage(update.Message.Chat.ID, update.Message.Text)
-			// SWITCH.
 			msgGenaral := update.Message.Text
 			log.Println("LOG -> ", msgGenaral)
 			switch update.Message.Text {
-			case "/startmenu":
+			case "/startmenu": // ГОТОВО!
 				keys := tgbotapi.NewMessage(update.Message.Chat.ID, update.Message.Text)
 				keys.ReplyMarkup = nmShowVisiters
 				bot.Send(keys)
 				break
-			case "👁Кто в цеху":
+			case "👁 Кто в цеху": // ГОТОВО!
 				resOut := jrnl.WhoInPlaceForBot()
 				msg := tgbotapi.NewMessage(update.Message.Chat.ID, resOut)
 				bot.Send(msg)
-			case "📊 Отчеты":
+			case "📊 Отчеты": // ГОТОВО!
 				keys := tgbotapi.NewMessage(update.Message.Chat.ID, "Включил --->"+update.Message.Text)
 				keys.ReplyMarkup = nmKeyJournal
 				bot.Send(keys)
-			case "🛠 Настройки":
+			case "🛠 Настройки": // ГОТОВО!
 				var bln bool
-				msg.Text = "🔐 АВТОРИЗАЦИЯ\nДля доступа в раздел настроек введите логин и пароль \nПример: Admin/qwerty123"
+				msg.Text = set.BOT_WRNING_ADMIN_INVATION
 				bot.Send(msg)
 				for upd := range updates {
 					msgIn := upd.Message.Text
@@ -166,40 +149,35 @@ func main() {
 						if len(res) == 2 {
 							bln = pkg.CheckAdminUser(res[0], res[1])
 							if bln != true {
-								msg := tgbotapi.NewMessage(update.Message.Chat.ID, "⛔️ Доступ запрещен!\nНеверный логин или пароль!")
+								msg := tgbotapi.NewMessage(update.Message.Chat.ID, set.BOT_ADMIN_ACCESS_BAD)
 								bot.Send(msg)
 								break
 							} else {
-								keys := tgbotapi.NewMessage(update.Message.Chat.ID, "✅ Доступ открыт!")
+								keys := tgbotapi.NewMessage(update.Message.Chat.ID, set.BOT_WARNING_ADMIN_ACCESS)
 								keys.ReplyMarkup = nmKeySettings
 								bot.Send(keys)
+								break
 							}
 						} else {
-							msg.Text = "⚠️Неверное количество аргументов для записи!\nПроверьте корректность внесенной информации!"
+							msg.Text = set.BOT_WARNING_ARGUMENTS_NOT_ENOUGH + "2 значения"
 							bot.Send(msg)
 						}
 					}
 				}
-
-			case "👷🏽 Сотрудники":
-				keys := tgbotapi.NewMessage(update.Message.Chat.ID, "Включил --->"+update.Message.Text)
+			case "👷🏽 Сотрудники": // ГОТОВО!
+				keys := tgbotapi.NewMessage(update.Message.Chat.ID, "Меню --->"+update.Message.Text)
 				keys.ReplyMarkup = nmKeyEmpl
 				bot.Send(keys)
-			case "🦸🏻 Администраторы":
-				keys := tgbotapi.NewMessage(update.Message.Chat.ID, "Включил --->"+update.Message.Text)
+			case "🦸🏻 Администраторы": // ГОТОВО!
+				keys := tgbotapi.NewMessage(update.Message.Chat.ID, "Меню --->"+update.Message.Text)
 				keys.ReplyMarkup = nmKeyAdmin
 				bot.Send(keys)
-			case "🗄 База данных":
-				keys := tgbotapi.NewMessage(update.Message.Chat.ID, "Включил --->"+update.Message.Text)
-				keys.ReplyMarkup = nmKeyDataBase
-				bot.Send(keys)
-			case "↩️-Назад":
+			case "↩️-Назад": // ГОТОВО!
 				keys := tgbotapi.NewMessage(update.Message.Chat.ID, update.Message.Text)
 				keys.ReplyMarkup = nmShowVisiters
 				bot.Send(keys)
-			// ТУТ ИДЕТ СЕРИЯ КЕЙСОВ ПО ОБРАБОТКЕ КОНЕЧНЫХ ПУНКТОВ МЕНЮ (Конечных кнопок!)
 			case "➕ Добавить сотрудника": // ГОТОВО
-				msg.Text = "Для добавления нового сотрудника, введите данные в следующей последовательности \nНомер карты/ФИО Сотрудника/Должность сотрудника/Зарплата сотрудника через '/'\nПример: 485548845/Иванов Иван Иванович/Слесарь/45000"
+				msg.Text = set.BOT_WARNING_ADDUSER_INFO
 				bot.Send(msg)
 				for upd := range updates {
 					msgIn := upd.Message.Text
@@ -212,14 +190,15 @@ func main() {
 							r = usr.AddInBot(res[0], res[1], res[2], res[3])
 							msg.Text = r
 							bot.Send(msg)
+							break
 						} else {
-							msg.Text = "⚠️Неверное количество аргументов для записи!\nПроверьте корректность внесенной информации!\nТребуется 4 значения"
+							msg.Text = set.BOT_WARNING_ARGUMENTS_NOT_ENOUGH + "4 значения"
 							bot.Send(msg)
 						}
 					}
 				}
 			case "❌ Удалить сотрудника": // ГОТОВО
-				msg.Text = "Для того чтобы удалить администратора введите ФИО удаляемого сотрудника \nПример: Иванов Иван Иванович"
+				msg.Text = set.BOT_WARNING_DELUSER_INFO
 				bot.Send(msg)
 				for upd := range updates {
 					msgIn := upd.Message.Text
@@ -233,18 +212,41 @@ func main() {
 							msg.Text = r
 							bot.Send(msg)
 						} else {
-							msg.Text = "⚠️Неверное количество аргументов для записи!\nПроверьте корректность внесенной информации!\nТребуется 1 значение"
+							msg.Text = set.BOT_WARNING_ARGUMENTS_NOT_ENOUGH + "1 значение"
 							bot.Send(msg)
 						}
 					}
 				}
-			case "✏️ Редактировать сотрудника": // TODO Доделать
+			case "✏️ Редактировать сотрудника": // ГОТОВО
+				msg.Text = set.BOT_WARNING_EDITUSER_INFO
+				bot.Send(msg)
+				preShow := usr.ShowAllInBot()
+				msg := tgbotapi.NewMessage(update.Message.Chat.ID, preShow)
+				bot.Send(msg)
+				for upd := range updates {
+					msgIn := upd.Message.Text
+					if msgIn == "↩️-Назад" {
+						break
+					} else {
+						res := pkg.NumberValuator(msgIn)
+						var r, show string
+						if len(res) == 4 {
+							r, show = usr.EditFromBot(res[0], res[1], res[2], res[3])
+							msg.Text = r + "\n" + show
+							bot.Send(msg)
+							break
+						} else {
+							msg.Text = set.BOT_WARNING_ARGUMENTS_NOT_ENOUGH + "4 значение"
+							bot.Send(msg)
+						}
+					}
+				}
 			case "🗂 Список сотрудников": // ГОТОВО
 				resOut := usr.ShowAllInBot()
 				msg := tgbotapi.NewMessage(update.Message.Chat.ID, resOut)
 				bot.Send(msg)
 			case "➕ Добавить администратора": // ГОТОВО
-				msg.Text = "Для добавления нового Администратора, введите данные в следующей последовательности \nЛогин/Пароль/Почта через '/'\nПример: Admin/qwerty123/admin@mail.ru"
+				msg.Text = set.BOT_WARNING_ADDADMIN_INFO
 				bot.Send(msg)
 				for upd := range updates {
 					msgIn := upd.Message.Text
@@ -258,13 +260,13 @@ func main() {
 							msg.Text = r
 							bot.Send(msg)
 						} else {
-							msg.Text = "⚠️Неверное количество аргументов для записи!\nПроверьте корректность внесенной информации!\nТребуется 4 значения"
+							msg.Text = set.BOT_WARNING_ARGUMENTS_NOT_ENOUGH + "3 значения"
 							bot.Send(msg)
 						}
 					}
 				}
 			case "❌ Удалить администратора": // ГОТОВО
-				msg.Text = "Для того чтобы удалить администратора введите логин \nПример: Admin"
+				msg.Text = set.BOT_WARNING_DELADMIN_INFO
 				bot.Send(msg)
 				for upd := range updates {
 					msgIn := upd.Message.Text
@@ -278,24 +280,41 @@ func main() {
 							msg.Text = r
 							bot.Send(msg)
 						} else {
-							msg.Text = "⚠️Неверное количество аргументов для записи!\nПроверьте корректность внесенной информации!\nТребуется 1 значение"
+							msg.Text = set.BOT_WARNING_ARGUMENTS_NOT_ENOUGH + "1 значение"
 							bot.Send(msg)
 						}
 					}
 				}
-			case "✏️ Редактировать администратора": // TODO Доделать
+			case "✏️ Редактировать администратора": // ГОТОВО!
+				msg.Text = set.BOT_WARNING_EDITADMIN_INFO
+				bot.Send(msg)
+				preShow := supUser.ShowAllInBot()
+				msg := tgbotapi.NewMessage(update.Message.Chat.ID, preShow)
+				bot.Send(msg)
+				for upd := range updates {
+					msgIn := upd.Message.Text
+					if msgIn == "↩️-Назад" {
+						break
+					} else {
+						res := pkg.NumberValuator(msgIn)
+						var r, show string
+						if len(res) == 4 {
+							r, show = supUser.EditFromBot(res[0], res[1], res[2], res[3])
+							msg.Text = r + "\n" + show
+							bot.Send(msg)
+							break
+						} else {
+							msg.Text = set.BOT_WARNING_ARGUMENTS_NOT_ENOUGH + "4 значение"
+							bot.Send(msg)
+						}
+					}
+				}
 			case "🗂 Список администраторов": //ГОТОВО
 				resOut := supUser.ShowAllInBot()
 				msg := tgbotapi.NewMessage(update.Message.Chat.ID, resOut)
 				bot.Send(msg)
-			// * Подменю раздела "База данных"
-			case "🔌 Создать новое подключение": // TODO Доделать
-			case "🧹 Очистить базу данных": // TODO Доделать
-			case "📦 Сделать бекап БД": // TODO Доделать
-			case "⚙️Посмотреть настройки подключения": // TODO Доделать
-			// * Подменю раздела "Отчеты"
-			case "📖 Журнал посещений по сотруднику за период":
-				msg.Text = "ℹ️ Укажите ФИО сотрудника и период за который нужно выгрузить журнал\nПример записи: 01.05.2022/13.05.2022/Иванов Иван Иванович"
+			case "📖 Журнал посещений по сотруднику за период": // ГОТОВО!
+				msg.Text = set.BOT_WARNING_EXPORT_USER_FILE_INFO
 				bot.Send(msg)
 				for upd := range updates {
 					msgIn := upd.Message.Text
@@ -308,21 +327,19 @@ func main() {
 							file := tgbotapi.FilePath(set.ExcelFile)
 							msg := tgbotapi.NewDocument(update.Message.Chat.ID, file)
 							bot.Send(msg)
+							break
 						} else {
-							msg.Text = "⚠️Неверное количество аргументов для записи!\nПроверьте корректность внесенной информации!\nТребуется 1 значение"
+							msg.Text = set.BOT_WARNING_ARGUMENTS_NOT_ENOUGH + "3 значения"
 							bot.Send(msg)
 						}
 					}
 				}
-			case "💵 ЗП по сотруднику за период":
-				msg.Text = "⚠️ Данный раздел находится в разработке!"
-				bot.Send(msg)
-			case "📆 Журнал посещения за период":
-				msg.Text = "ℹ️ Укажите период за который нужно выгрузить журнал \nПример записи: 01.05.2022/13.05.2022"
+			case "📆 Журнал посещения за период": // ГОТОВО!
+				msg.Text = set.BOT_WARNING_EXPORT_FILE_INFO
 				bot.Send(msg)
 				for upd := range updates {
 					msgIn := upd.Message.Text
-					if msgIn == "   ↩️   " {
+					if msgIn == "↩️-Назад" {
 						break
 					} else {
 						res := pkg.NumberValuator(msgIn)
@@ -332,17 +349,12 @@ func main() {
 							msg := tgbotapi.NewDocument(update.Message.Chat.ID, file)
 							bot.Send(msg)
 						} else {
-							msg.Text = "⚠️Неверное количество аргументов для записи!\nПроверьте корректность внесенной информации!\nТребуется 1 значение"
+							msg.Text = set.BOT_WARNING_ARGUMENTS_NOT_ENOUGH + "2 значение"
 							bot.Send(msg)
 						}
 					}
 				}
 			}
-			// Send the message.
-
-			// if _, err := bot.Send(msg); err != nil {
-			// 	panic(err)
-			// }
 		} else if update.CallbackQuery != nil {
 			callback := tgbotapi.NewCallback(update.CallbackQuery.ID, update.CallbackQuery.Data)
 			if _, err := bot.Request(callback); err != nil {

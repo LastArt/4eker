@@ -14,11 +14,8 @@ func GetStart() {
 	pattern := "[[:digit:]]"
 	reg := regexp.MustCompile(pattern)
 
-	fmt.Println(string(set.Yellow), set.Headlogo, string(set.ResetColor))
-	fmt.Println(string(set.Blue), set.Logo)
-	fmt.Println(string(set.Yellow), set.Sublogo, string(set.ResetColor))
 	fmt.Println(set.Descr)
-L1:
+
 	emplID = NewScan()
 
 	isNumbers := reg.MatchString(emplID)
@@ -27,32 +24,32 @@ L1:
 		adminLog = NewScan()
 		fmt.Println(string(set.Yellow), "Введите пароль администратора", string(set.ResetColor))
 		adminPass = NewScan()
-		check = CheckAdminUser(adminLog, adminPass) //! Проверить на предмет обновления принципа проверки!!!
+		check = CheckAdminUser(adminLog, adminPass)
 		if check != true {
 			fmt.Println(set.Red + set.AccesDenied + set.ResetColor)
 		} else {
-			GetSettings()
+			GetCliMenu()
 		}
-		// Запускаем отдельную функцию с кейсами по настройки и управлению GetSettings()
 		time.Sleep(3 * time.Second)
 		fmt.Println(set.Descr)
-		goto L1 // Оставляю рекурсивно, но возможно перейду на goto
+		GetStart()
 	} else {
 		if isNumbers {
 			var usr = new(User)
-			//res, _ = strconv.Atoi(dataTime)
 			datetime := TmFormat()
 			dt := datetime.Format("02.01.2006")
 			tm := datetime.Format("15:04")
-			fmt.Printf("dtRES : - %s\ntmRES : - %s", dt, tm)
+			fmt.Printf("Дата: - %s\nВремя: - %s", dt, tm)
 			whoEntered := usr.CheckInTimeValidation(emplID)
 			usr.AdCheckinToDb(whoEntered[1], datetime)
-			Check(whoEntered[1], whoEntered[0], whoEntered[2], dt, tm)
-			goto L1
+			//Check(whoEntered[1], whoEntered[0], whoEntered[2], dt, tm) // Функция оповещения через бота !Допилить чтобы ее работа не мешала CLI
+			time.Sleep(2 * time.Second)
+			GetStart()
 		} else {
 			fmt.Println(string(set.Red), set.ERROR_INPUT, string(set.ResetColor))
-			goto L1
+			time.Sleep(2 * time.Second)
+			GetStart()
 		}
 	}
-	//return res
+
 }

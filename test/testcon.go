@@ -1,10 +1,10 @@
 package main
 
 import (
+	"4eker/pkg"
+	"4eker/set"
 	"database/sql"
 	"fmt"
-	"kontroller/pkg"
-	"kontroller/set"
 	"log"
 	"strconv"
 
