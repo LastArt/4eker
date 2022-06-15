@@ -16,7 +16,7 @@ type employee struct {
 
 func main() {
 
-	connStr := "user=postgres password=angiolog dbname=scudpg sslmode=disable"
+	connStr := "user=postgres password=qwerty dbname=scudpg sslmode=disable"
 	db, err := sql.Open("postgres", connStr)
 	if err != nil {
 		panic(err)
