@@ -1,5 +1,5 @@
 # Default ignored files
-/set/config.json
-/test/dbcon.go
-/export.xlsx
-/set/notcorrect.txt
+set/config.json
+test/dbcon.go
+export.xlsx
+set/notcorrect.txt
