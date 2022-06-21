@@ -12,7 +12,7 @@ import (
 //Метод добавляющий администратора через чат бота!
 func (su SuperUser) AddInBot(log, pass, mail string) string {
 	var res string
-	db, err := sql.Open("mysql", "u0813820_artur:Zmkstaltex2019@tcp(31.31.198.44:3306)/u0813820_urv")
+	db, err := sql.Open("mysql", ConnString())
 	if err != nil {
 		panic(err)
 	}
@@ -30,7 +30,7 @@ func (su SuperUser) AddInBot(log, pass, mail string) string {
 //Метод удаляющий  администраторов из чата бота
 func (su SuperUser) DeleteRowInBot(id string) string {
 	var res string
-	db, err := sql.Open("mysql", "u0813820_artur:Zmkstaltex2019@tcp(31.31.198.44:3306)/u0813820_urv")
+	db, err := sql.Open("mysql", ConnString())
 	if err != nil {
 		panic(err)
 	}
@@ -47,7 +47,7 @@ func (su SuperUser) DeleteRowInBot(id string) string {
 // Метод редактирующий администраторов  из чат бота
 func (su SuperUser) EditFromBot(id, newLogin, newPass, newMail string) (string, string) {
 	var res, show string
-	db, err := sql.Open("mysql", "u0813820_artur:Zmkstaltex2019@tcp(31.31.198.44:3306)/u0813820_urv")
+	db, err := sql.Open("mysql", ConnString())
 	if err != nil {
 		panic(err)
 	}
@@ -69,7 +69,7 @@ func (su SuperUser) EditFromBot(id, newLogin, newPass, newMail string) (string, 
 // 3 Метод выводящий весь список администраторов в чат бота
 func (su SuperUser) ShowAllInBot() string {
 	var id string
-	db, err := sql.Open("mysql", "u0813820_artur:Zmkstaltex2019@tcp(31.31.198.44:3306)/u0813820_urv")
+	db, err := sql.Open("mysql", ConnString())
 	if err != nil {
 		panic(err)
 	}
@@ -101,7 +101,7 @@ func (j Journal) WhoInPlaceForBot() string {
 	tm := datetime.Format("15:04")
 	var id string
 	fmt.Println("Сегодня: ", dt)
-	db, err := sql.Open("mysql", "u0813820_artur:Zmkstaltex2019@tcp(31.31.198.44:3306)/u0813820_urv")
+	db, err := sql.Open("mysql", ConnString())
 	if err != nil {
 		panic(err)
 	}
@@ -126,7 +126,7 @@ func (j Journal) WhoInPlaceForBot() string {
 
 // Метод выводящий весь список сотрудников в бота!
 func (u User) ShowAllInBot() string {
-	db, err := sql.Open("mysql", "u0813820_artur:Zmkstaltex2019@tcp(31.31.198.44:3306)/u0813820_urv")
+	db, err := sql.Open("mysql", ConnString())
 	if err != nil {
 		panic(err)
 	}
@@ -151,7 +151,7 @@ func (u User) ShowAllInBot() string {
 // Метод удаляющий сотрудника через чат бота!
 func (u User) DeleteRowInBot(card string) (string, string) {
 	var res, show string
-	db, err := sql.Open("mysql", "u0813820_artur:Zmkstaltex2019@tcp(31.31.198.44:3306)/u0813820_urv")
+	db, err := sql.Open("mysql", ConnString())
 	if err != nil {
 		panic(err)
 	}
@@ -169,14 +169,12 @@ func (u User) DeleteRowInBot(card string) (string, string) {
 // Метод добавляющий сотрудника через чат бота!
 func (u User) AddInBot(card, fio, spec, sal string) string {
 	var res string
-	db, err := sql.Open("mysql", "u0813820_artur:Zmkstaltex2019@tcp(31.31.198.44:3306)/u0813820_urv")
+	db, err := sql.Open("mysql", ConnString())
 	if err != nil {
 		panic(err)
 	}
 	defer db.Close()
 	_, err = db.Exec("INSERT INTO user (cardid, fio, speciality, sallary) VALUES (?, ?, ?, ?)", card, fio, spec, sal)
-	log.Println("Что тут за хуйня творится", card, fio, spec, sal) // УБРАТЬ ПОТОМ
-	log.Println("Что в ERROR", err)                                // УБРАТЬ ПОТОМ
 	if err != nil {
 		res = set.BOT_ERROR_ADDTODB
 
@@ -190,7 +188,7 @@ func (u User) AddInBot(card, fio, spec, sal string) string {
 //Метод редактирующий сотрудников через чат бота
 func (u User) EditFromBot(cardnum, newFio, newSpec, newSal string) (string, string) {
 	var res, show string
-	db, err := sql.Open("mysql", "u0813820_artur:Zmkstaltex2019@tcp(31.31.198.44:3306)/u0813820_urv")
+	db, err := sql.Open("mysql", ConnString())
 	if err != nil {
 		panic(err)
 	}

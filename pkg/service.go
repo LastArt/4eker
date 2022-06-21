@@ -87,11 +87,25 @@ func BotApiKey() string {
 	}
 	return conf.TelegramBotToken
 }
+func ConnString() string {
+	file, err := os.Open("./set/config.json")
+	if err != nil {
+		panic(err.Error())
+	}
+
+	decoder := json.NewDecoder(file)
+	conf := Config{}
+	err = decoder.Decode(&conf)
+	if err != nil {
+		panic(err.Error())
+	}
+	return conf.ConnectionString
+}
 
 func CheckAdminUser(log, pass string) bool {
 	var res bool = false
 	var pwd, lg string
-	db, err := sql.Open("mysql", "u0813820_artur:Zmkstaltex2019@tcp(31.31.198.44:3306)/u0813820_urv")
+	db, err := sql.Open("mysql", ConnString())
 	if err != nil {
 		panic(err)
 	}
@@ -176,7 +190,7 @@ func PresentJournalToDay(data1, data2 string) {
 	jrnl := new(Journal)
 	var id string
 
-	db, err := sql.Open("mysql", "u0813820_artur:Zmkstaltex2019@tcp(31.31.198.44:3306)/u0813820_urv")
+	db, err := sql.Open("mysql", ConnString())
 	if err != nil {
 		panic(err)
 	}
@@ -216,7 +230,7 @@ func PresentJournalToEmpl(data1, data2, fio string) {
 	jrnl := new(Journal)
 	var id string
 
-	db, err := sql.Open("mysql", "u0813820_artur:Zmkstaltex2019@tcp(31.31.198.44:3306)/u0813820_urv")
+	db, err := sql.Open("mysql", ConnString())
 	if err != nil {
 		panic(err)
 	}
@@ -247,7 +261,7 @@ func PresentJournalToEmpl(data1, data2, fio string) {
 
 // Формируем журнал посещений  за период
 func (j Journal) ExportToExcel() {
-	db, err := sql.Open("mysql", "u0813820_artur:Zmkstaltex2019@tcp(31.31.198.44:3306)/u0813820_urv")
+	db, err := sql.Open("mysql", ConnString())
 	if err != nil {
 		panic(err)
 	}
@@ -262,7 +276,7 @@ func (j Journal) ExportToExcel() {
 
 //Запись отметки в бд
 func (u User) AdCheckinToDb(fio string, datetime time.Time) {
-	db, err := sql.Open("mysql", "u0813820_artur:Zmkstaltex2019@tcp(31.31.198.44:3306)/u0813820_urv")
+	db, err := sql.Open("mysql", ConnString())
 	if err != nil {
 		panic(err)
 	}

@@ -16,7 +16,7 @@ import (
 
 // Метод добавляющий администраторa через консоль (Меню 6)
 func (su SuperUser) Add() {
-	db, err := sql.Open("mysql", "u0813820_artur:Zmkstaltex2019@tcp(31.31.198.44:3306)/u0813820_urv")
+	db, err := sql.Open("mysql", ConnString())
 	if err != nil {
 		panic(err)
 	}
@@ -52,7 +52,7 @@ func (su SuperUser) Add() {
 
 //Метод редактирующий администраторов  из консоли (Меню 7)
 func (su SuperUser) Edit(id string) {
-	db, err := sql.Open("mysql", "u0813820_artur:Zmkstaltex2019@tcp(31.31.198.44:3306)/u0813820_urv")
+	db, err := sql.Open("mysql", ConnString())
 	if err != nil {
 		panic(err)
 	}
@@ -88,7 +88,7 @@ func (su SuperUser) Edit(id string) {
 //Метод удаляющий  администраторов из консоли (Меню 8)
 func (su SuperUser) DeleteRow(id string) {
 
-	db, err := sql.Open("mysql", "u0813820_artur:Zmkstaltex2019@tcp(31.31.198.44:3306)/u0813820_urv")
+	db, err := sql.Open("mysql", ConnString())
 	if err != nil {
 		panic(err)
 	}
@@ -103,7 +103,7 @@ func (su SuperUser) DeleteRow(id string) {
 
 //Метод выводящий весь список администраторов в консоль (Меню 9)
 func (su SuperUser) ShowAll() {
-	db, err := sql.Open("mysql", "u0813820_artur:Zmkstaltex2019@tcp(31.31.198.44:3306)/u0813820_urv")
+	db, err := sql.Open("mysql", ConnString())
 	if err != nil {
 		panic(err)
 	}
@@ -141,7 +141,7 @@ func (su SuperUser) ShowAll() {
 
 // Метод добавляющий сотрудника через консоль!
 func (u User) Add() {
-	db, err := sql.Open("mysql", "u0813820_artur:Zmkstaltex2019@tcp(31.31.198.44:3306)/u0813820_urv")
+	db, err := sql.Open("mysql", ConnString())
 	if err != nil {
 		panic(err)
 	}
@@ -177,7 +177,7 @@ func (u User) Add() {
 
 // Метод редактирующий сотрудников через консоль
 func (u User) Edit(cardnum string) {
-	db, err := sql.Open("mysql", "u0813820_artur:Zmkstaltex2019@tcp(31.31.198.44:3306)/u0813820_urv")
+	db, err := sql.Open("mysql", ConnString())
 	if err != nil {
 		panic(err)
 	}
@@ -213,7 +213,7 @@ func (u User) Edit(cardnum string) {
 
 // Метод удаляющий сотрудника в консоли!
 func (u User) DeleteRow(cardnum string) {
-	db, err := sql.Open("mysql", "u0813820_artur:Zmkstaltex2019@tcp(31.31.198.44:3306)/u0813820_urv")
+	db, err := sql.Open("mysql", ConnString())
 	if err != nil {
 		panic(err)
 	}
@@ -229,7 +229,7 @@ func (u User) DeleteRow(cardnum string) {
 
 // Метод выводящий весь список сотрудников в консоль!
 func (u User) ShowAll() {
-	db, err := sql.Open("mysql", "u0813820_artur:Zmkstaltex2019@tcp(31.31.198.44:3306)/u0813820_urv")
+	db, err := sql.Open("mysql", ConnString())
 	if err != nil {
 		panic(err)
 	}
@@ -265,7 +265,7 @@ func (j Journal) WhoInPlace() {
 	tm := datetime.Format("15:04")
 	var id string
 	fmt.Println("Сегодня: ", dt)
-	db, err := sql.Open("mysql", "u0813820_artur:Zmkstaltex2019@tcp(31.31.198.44:3306)/u0813820_urv")
+	db, err := sql.Open("mysql", ConnString())
 	if err != nil {
 		panic(err)
 	}
@@ -306,7 +306,7 @@ func (u User) CheckInTimeValidation(cardnum string) []string {
 	var crd string
 	var str = []string{"n/a", "n/a", "n/a", "n/a"}
 
-	db, err := sql.Open("mysql", "u0813820_artur:Zmkstaltex2019@tcp(31.31.198.44:3306)/u0813820_urv")
+	db, err := sql.Open("mysql", ConnString())
 	if err != nil {
 		panic(err)
 	}
