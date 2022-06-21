@@ -5,17 +5,19 @@ import (
 	"database/sql"
 	"fmt"
 	"log"
+
+	_ "github.com/go-sql-driver/mysql"
 )
 
 //Метод добавляющий администратора через чат бота!
 func (su SuperUser) AddInBot(log, pass, mail string) string {
 	var res string
-	db, err := sql.Open("sqlite3", "./scud.db")
+	db, err := sql.Open("mysql", "u0813820_artur:Zmkstaltex2019@tcp(31.31.198.44:3306)/u0813820_urv")
 	if err != nil {
 		panic(err)
 	}
 	defer db.Close()
-	_, err = db.Exec("INSERT INTO superuser (Login, Password, Email) VALUES (?, ?, ?)", log, pass, mail)
+	_, err = db.Exec("INSERT INTO superuser (login, password, email) VALUES (?, ?, ?)", log, pass, mail)
 	if err != nil {
 		res = set.BOT_ERROR_ADDTODB
 	} else {
@@ -26,14 +28,14 @@ func (su SuperUser) AddInBot(log, pass, mail string) string {
 }
 
 //Метод удаляющий  администраторов из чата бота
-func (su SuperUser) DeleteRowInBot(log string) string {
+func (su SuperUser) DeleteRowInBot(id string) string {
 	var res string
-	db, err := sql.Open("sqlite3", "./scud.db")
+	db, err := sql.Open("mysql", "u0813820_artur:Zmkstaltex2019@tcp(31.31.198.44:3306)/u0813820_urv")
 	if err != nil {
 		panic(err)
 	}
 	defer db.Close()
-	_, err = db.Exec("delete from superuser where Login = ?", log)
+	_, err = db.Exec("DELETE FROM superuser WHERE id = ?", id)
 	if err != nil {
 		res = set.BOT_ERROR_DELETE_USER
 	} else {
@@ -45,15 +47,15 @@ func (su SuperUser) DeleteRowInBot(log string) string {
 // Метод редактирующий администраторов  из чат бота
 func (su SuperUser) EditFromBot(id, newLogin, newPass, newMail string) (string, string) {
 	var res, show string
-	db, err := sql.Open("sqlite3", "./scud.db")
+	db, err := sql.Open("mysql", "u0813820_artur:Zmkstaltex2019@tcp(31.31.198.44:3306)/u0813820_urv")
 	if err != nil {
 		panic(err)
 	}
 	defer db.Close()
 
-	_, err = db.Exec("UPDATE superuser SET Login = ? WHERE id = ?", newLogin, id)
-	_, err = db.Exec("UPDATE superuser SET Password = ? WHERE id = ?", newPass, id)
-	_, err = db.Exec("UPDATE superuser SET Email = ? WHERE id = ?", newMail, id)
+	_, err = db.Exec("UPDATE superuser SET login = ? WHERE id = ?", newLogin, id)
+	_, err = db.Exec("UPDATE superuser SET password = ? WHERE id = ?", newPass, id)
+	_, err = db.Exec("UPDATE superuser SET email = ? WHERE id = ?", newMail, id)
 	if err != nil {
 		res = set.BOT_ERROR_EDITUSER
 	} else {
@@ -67,7 +69,7 @@ func (su SuperUser) EditFromBot(id, newLogin, newPass, newMail string) (string, 
 // 3 Метод выводящий весь список администраторов в чат бота
 func (su SuperUser) ShowAllInBot() string {
 	var id string
-	db, err := sql.Open("sqlite3", "./scud.db")
+	db, err := sql.Open("mysql", "u0813820_artur:Zmkstaltex2019@tcp(31.31.198.44:3306)/u0813820_urv")
 	if err != nil {
 		panic(err)
 	}
@@ -99,12 +101,12 @@ func (j Journal) WhoInPlaceForBot() string {
 	tm := datetime.Format("15:04")
 	var id string
 	fmt.Println("Сегодня: ", dt)
-	db, err := sql.Open("sqlite3", "./scud.db")
+	db, err := sql.Open("mysql", "u0813820_artur:Zmkstaltex2019@tcp(31.31.198.44:3306)/u0813820_urv")
 	if err != nil {
 		panic(err)
 	}
 	defer db.Close()
-	rows, err := db.Query("SELECT * FROM journal WHERE Date = ? AND Time < ?", dt, tm)
+	rows, err := db.Query("SELECT * FROM journal WHERE date = ? AND time < ?", dt, tm)
 	if err != nil {
 		panic(err)
 	}
@@ -124,7 +126,7 @@ func (j Journal) WhoInPlaceForBot() string {
 
 // Метод выводящий весь список сотрудников в бота!
 func (u User) ShowAllInBot() string {
-	db, err := sql.Open("sqlite3", "./scud.db")
+	db, err := sql.Open("mysql", "u0813820_artur:Zmkstaltex2019@tcp(31.31.198.44:3306)/u0813820_urv")
 	if err != nil {
 		panic(err)
 	}
@@ -147,32 +149,34 @@ func (u User) ShowAllInBot() string {
 }
 
 // Метод удаляющий сотрудника через чат бота!
-func (u User) DeleteRowInBot(fio string) string {
-	var res string
-	db, err := sql.Open("sqlite3", "./scud.db")
+func (u User) DeleteRowInBot(card string) (string, string) {
+	var res, show string
+	db, err := sql.Open("mysql", "u0813820_artur:Zmkstaltex2019@tcp(31.31.198.44:3306)/u0813820_urv")
 	if err != nil {
 		panic(err)
 	}
 	defer db.Close()
-	_, err = db.Exec("DELETE FROM user WHERE Fio = ?", fio)
-
+	_, err = db.Exec("DELETE FROM user WHERE cardid = ?", card)
 	if err != nil {
 		res = set.BOT_ERROR_DELETE_USER
 	} else {
 		res = set.BOT_WARNING_DELETE_FINE
+		show = u.ShowAllInBot()
 	}
-	return res
+	return res, show
 }
 
 // Метод добавляющий сотрудника через чат бота!
 func (u User) AddInBot(card, fio, spec, sal string) string {
 	var res string
-	db, err := sql.Open("sqlite3", "./scud.db")
+	db, err := sql.Open("mysql", "u0813820_artur:Zmkstaltex2019@tcp(31.31.198.44:3306)/u0813820_urv")
 	if err != nil {
 		panic(err)
 	}
 	defer db.Close()
-	_, err = db.Exec("INSERT INTO user (CardId, Fio, Speciality, Salary) VALUES (?, ?, ?, ?)", card, fio, spec, sal)
+	_, err = db.Exec("INSERT INTO user (cardid, fio, speciality, sallary) VALUES (?, ?, ?, ?)", card, fio, spec, sal)
+	log.Println("Что тут за хуйня творится", card, fio, spec, sal) // УБРАТЬ ПОТОМ
+	log.Println("Что в ERROR", err)                                // УБРАТЬ ПОТОМ
 	if err != nil {
 		res = set.BOT_ERROR_ADDTODB
 
@@ -186,15 +190,16 @@ func (u User) AddInBot(card, fio, spec, sal string) string {
 //Метод редактирующий сотрудников через чат бота
 func (u User) EditFromBot(cardnum, newFio, newSpec, newSal string) (string, string) {
 	var res, show string
-	db, err := sql.Open("sqlite3", "./scud.db")
+	db, err := sql.Open("mysql", "u0813820_artur:Zmkstaltex2019@tcp(31.31.198.44:3306)/u0813820_urv")
 	if err != nil {
 		panic(err)
 	}
 	defer db.Close()
 
-	_, err = db.Exec("UPDATE user SET Fio = ? WHERE CardId = ?", newFio, cardnum)
-	_, err = db.Exec("UPDATE user SET Speciality = ? WHERE CardId = ?", newSpec, cardnum)
-	_, err = db.Exec("UPDATE user SET Salary = ? WHERE CardId = ?", newSal, cardnum)
+	_, err = db.Exec("UPDATE user SET fio = ? WHERE cardid = ?", newFio, cardnum)
+	_, err = db.Exec("UPDATE user SET speciality = ? WHERE cardid = ?", newSpec, cardnum)
+	_, err = db.Exec("UPDATE user SET sallary = ? WHERE cardid = ?", newSal, cardnum)
+
 	if err != nil {
 		res = set.BOT_ERROR_EDITUSER
 	} else {

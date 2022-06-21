@@ -73,15 +73,30 @@ func StringScan() string {
 	return str
 }
 
+func BotApiKey() string {
+	file, err := os.Open("./set/config.json")
+	if err != nil {
+		panic(err.Error())
+	}
+
+	decoder := json.NewDecoder(file)
+	conf := Config{}
+	err = decoder.Decode(&conf)
+	if err != nil {
+		panic(err.Error())
+	}
+	return conf.TelegramBotToken
+}
+
 func CheckAdminUser(log, pass string) bool {
 	var res bool = false
 	var pwd, lg string
-	db, err := sql.Open("sqlite3", "./scud.db")
+	db, err := sql.Open("mysql", "u0813820_artur:Zmkstaltex2019@tcp(31.31.198.44:3306)/u0813820_urv")
 	if err != nil {
 		panic(err)
 	}
 	defer db.Close()
-	rows, err := db.Query("SELECT * FROM superuser WHERE Login=? AND Password =?", log, pass)
+	rows, err := db.Query("SELECT * FROM superuser WHERE login=? AND password =?", log, pass)
 	if err != nil {
 		panic(err)
 	}
@@ -161,12 +176,12 @@ func PresentJournalToDay(data1, data2 string) {
 	jrnl := new(Journal)
 	var id string
 
-	db, err := sql.Open("sqlite3", "./scud.db")
+	db, err := sql.Open("mysql", "u0813820_artur:Zmkstaltex2019@tcp(31.31.198.44:3306)/u0813820_urv")
 	if err != nil {
 		panic(err)
 	}
 	defer db.Close()
-	rows, err := db.Query("SELECT * FROM journal WHERE Date BETWEEN ? AND  ? ", data1, data2)
+	rows, err := db.Query("SELECT * FROM journal WHERE date BETWEEN ? AND  ? ", data1, data2)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -201,12 +216,12 @@ func PresentJournalToEmpl(data1, data2, fio string) {
 	jrnl := new(Journal)
 	var id string
 
-	db, err := sql.Open("sqlite3", "./scud.db")
+	db, err := sql.Open("mysql", "u0813820_artur:Zmkstaltex2019@tcp(31.31.198.44:3306)/u0813820_urv")
 	if err != nil {
 		panic(err)
 	}
 	defer db.Close()
-	rows, err := db.Query("SELECT * FROM journal WHERE Date BETWEEN ? AND  ? AND FioVisiter=? ", data1, data2, fio)
+	rows, err := db.Query("SELECT * FROM journal WHERE date BETWEEN ? AND  ? AND FioVisiter=? ", data1, data2, fio)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -232,13 +247,13 @@ func PresentJournalToEmpl(data1, data2, fio string) {
 
 // Формируем журнал посещений  за период
 func (j Journal) ExportToExcel() {
-	db, err := sql.Open("sqlite3", "./scud.db")
+	db, err := sql.Open("mysql", "u0813820_artur:Zmkstaltex2019@tcp(31.31.198.44:3306)/u0813820_urv")
 	if err != nil {
 		panic(err)
 	}
 	defer db.Close()
 
-	rows, err := db.Query("SELECT * FROM journal WHERE Data = ?")
+	rows, err := db.Query("SELECT * FROM journal WHERE data = ?")
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -247,7 +262,7 @@ func (j Journal) ExportToExcel() {
 
 //Запись отметки в бд
 func (u User) AdCheckinToDb(fio string, datetime time.Time) {
-	db, err := sql.Open("sqlite3", "./scud.db")
+	db, err := sql.Open("mysql", "u0813820_artur:Zmkstaltex2019@tcp(31.31.198.44:3306)/u0813820_urv")
 	if err != nil {
 		panic(err)
 	}
@@ -255,7 +270,7 @@ func (u User) AdCheckinToDb(fio string, datetime time.Time) {
 
 	dt := datetime.Format("02.01.2006")
 	tm := datetime.Format("15:04")
-	_, err = db.Exec("INSERT INTO journal (FioVisiter, Date, Time) values (?, ?, ?)", fio, dt, tm)
+	_, err = db.Exec("INSERT INTO journal (fiovisiter, date, time) values (?, ?, ?)", fio, dt, tm)
 	if err != nil {
 		fmt.Println(set.ERROR_INSERT_TODB, err)
 	}

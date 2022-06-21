@@ -3,8 +3,8 @@ module 4eker
 go 1.17
 
 require (
+	github.com/go-sql-driver/mysql v1.6.0
 	github.com/go-telegram-bot-api/telegram-bot-api/v5 v5.5.1
-	github.com/lib/pq v1.10.6
 	github.com/mattn/go-sqlite3 v1.14.13
 	github.com/olekukonko/tablewriter v0.0.5
 	github.com/xuri/excelize/v2 v2.6.0

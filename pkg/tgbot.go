@@ -11,8 +11,20 @@ type Client struct {
 }
 type Config struct {
 	TelegramBotToken string
+	ConnectionString string
 }
 
+func NewBot(token string) *Client {
+	bot, err := tgbotapi.NewBotAPI(token)
+	if err != nil {
+		log.Panic(err)
+	}
+	return &Client{
+		bot: bot,
+	}
+}
+
+/*
 func New(apiKey string) *Client {
 	bot, err := tgbotapi.NewBotAPI(apiKey)
 	if err != nil {
@@ -22,6 +34,7 @@ func New(apiKey string) *Client {
 		bot: bot,
 	}
 }
+*/
 
 func (c *Client) SendMessage(text string, chatId int64) error {
 	msg := tgbotapi.NewMessage(chatId, text)

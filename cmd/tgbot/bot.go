@@ -3,8 +3,6 @@ package main
 import (
 	"4eker/pkg"
 	"4eker/set"
-	"flag"
-	"fmt"
 	"log"
 
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
@@ -22,6 +20,9 @@ var nmShowVisiters = tgbotapi.NewReplyKeyboard( // Показывает журн
 	),
 	tgbotapi.NewKeyboardButtonRow(
 		tgbotapi.NewKeyboardButton("🛠 Настройки"),
+	),
+	tgbotapi.NewKeyboardButtonRow(
+		tgbotapi.NewKeyboardButton("↩️-Назад"),
 	),
 )
 
@@ -96,13 +97,8 @@ var exitKey = tgbotapi.NewInlineKeyboardMarkup(
 
 func main() {
 	var token string
-	flag.StringVar(&token, "apikey", "---", "Токен телеграм бота")
 
-	flag.Parse()
-	if token == "---" {
-		fmt.Println("Введите токен!")
-	}
-
+	token = pkg.BotApiKey()
 	bot, _ := tgbotapi.NewBotAPI(token)
 
 	u := tgbotapi.NewUpdate(0)
@@ -200,16 +196,19 @@ func main() {
 			case "❌ Удалить сотрудника": // ГОТОВО
 				msg.Text = set.BOT_WARNING_DELUSER_INFO
 				bot.Send(msg)
+				preShow := usr.ShowAllInBot()
+				msg := tgbotapi.NewMessage(update.Message.Chat.ID, preShow)
+				bot.Send(msg)
 				for upd := range updates {
 					msgIn := upd.Message.Text
 					if msgIn == "↩️-Назад" {
 						break
 					} else {
 						res := pkg.NumberValuator(msgIn)
-						var r string
+						var r, show string
 						if len(res) == 1 {
-							r = usr.DeleteRowInBot(res[0])
-							msg.Text = r
+							r, show = usr.DeleteRowInBot(res[0])
+							msg.Text = r + "\n" + show
 							bot.Send(msg)
 						} else {
 							msg.Text = set.BOT_WARNING_ARGUMENTS_NOT_ENOUGH + "1 значение"
@@ -236,7 +235,7 @@ func main() {
 							bot.Send(msg)
 							break
 						} else {
-							msg.Text = set.BOT_WARNING_ARGUMENTS_NOT_ENOUGH + "4 значение"
+							msg.Text = set.BOT_WARNING_ARGUMENTS_NOT_ENOUGH + "4 значения"
 							bot.Send(msg)
 						}
 					}
@@ -267,6 +266,9 @@ func main() {
 				}
 			case "❌ Удалить администратора": // ГОТОВО
 				msg.Text = set.BOT_WARNING_DELADMIN_INFO
+				bot.Send(msg)
+				preShow := supUser.ShowAllInBot()
+				msg := tgbotapi.NewMessage(update.Message.Chat.ID, preShow)
 				bot.Send(msg)
 				for upd := range updates {
 					msgIn := upd.Message.Text
